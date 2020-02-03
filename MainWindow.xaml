@@ -114,8 +114,8 @@
 
 
         <StackPanel Name="footerStackPanel" Grid.Row="2" Orientation="Horizontal">
-            <Button Name="selectPathBtn" Width="50" Margin="5">Select</Button>
-            <TextBlock Name="folderPathTextBlock" Grid.Column="1" Margin="5" VerticalAlignment="Center">
+            <Button Name="selectPathBtn" Width="50" Margin="5" Click="SelectPathBtn_Click">Select</Button>
+            <TextBlock Name="selectedPathTextBlock" Grid.Column="1" Margin="5" VerticalAlignment="Center">
                 osu! song folder: C:\Users\Documents\GitHub\osu-song-player
             </TextBlock>
 

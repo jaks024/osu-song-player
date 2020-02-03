@@ -22,16 +22,33 @@ namespace osu_song_player
 	{
 
 		public List<SongViewModel> songs { get; } = new List<SongViewModel>();
-
+		public string selectedFolderPath;
 		public MainWindow()
 		{
-
-			SongViewModel song = new SongViewModel(0, "song one", "5:00", "path/123");
-			songs.Add(song);
-
 			InitializeComponent();
 			songListBox.DataContext = this;
 
+		}
+
+		private void SelectPathBtn_Click(object sender, RoutedEventArgs e)
+		{
+			var dialog = new System.Windows.Forms.FolderBrowserDialog();
+			if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+			{
+				if (!dialog.SelectedPath.Equals(selectedFolderPath))
+				{
+					selectedFolderPath = dialog.SelectedPath;
+					selectedPathTextBlock.Text = selectedFolderPath;
+
+					List<string> folders = SongFolderCrawler.Search(selectedFolderPath);
+					for(int i = 0; i < folders.Count; i++)
+					{
+						songs.Add(new SongViewModel(i, folders[i], folders[i].Length.ToString(), folders[i])); 
+					}
+					songListBox.Items.Refresh();
+				}
+				
+			}
 		}
 	}
 }
