@@ -20,9 +20,18 @@ namespace osu_song_player
 	/// </summary>
 	public partial class MainWindow : Window
 	{
+
+		public List<SongViewModel> songs { get; } = new List<SongViewModel>();
+
 		public MainWindow()
 		{
+
+			SongViewModel song = new SongViewModel(0, "song one", "5:00", "path/123");
+			songs.Add(song);
+
 			InitializeComponent();
+			songListBox.DataContext = this;
+
 		}
 	}
 }

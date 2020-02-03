@@ -1,0 +1,15 @@
+C:\Users\Jackson\Documents\GitHub\osu-song-player\bin\Debug\osu-song-player.exe.config
+C:\Users\Jackson\Documents\GitHub\osu-song-player\bin\Debug\osu-song-player.exe
+C:\Users\Jackson\Documents\GitHub\osu-song-player\bin\Debug\osu-song-player.pdb
+C:\Users\Jackson\Documents\GitHub\osu-song-player\obj\Debug\osu-song-player.csprojAssemblyReference.cache
+C:\Users\Jackson\Documents\GitHub\osu-song-player\obj\Debug\MainWindow.g.cs
+C:\Users\Jackson\Documents\GitHub\osu-song-player\obj\Debug\App.g.cs
+C:\Users\Jackson\Documents\GitHub\osu-song-player\obj\Debug\osu-song-player_MarkupCompile.cache
+C:\Users\Jackson\Documents\GitHub\osu-song-player\obj\Debug\osu-song-player_MarkupCompile.lref
+C:\Users\Jackson\Documents\GitHub\osu-song-player\obj\Debug\MainWindow.baml
+C:\Users\Jackson\Documents\GitHub\osu-song-player\obj\Debug\osu-song-player.g.resources
+C:\Users\Jackson\Documents\GitHub\osu-song-player\obj\Debug\osu_song_player.Properties.Resources.resources
+C:\Users\Jackson\Documents\GitHub\osu-song-player\obj\Debug\osu-song-player.csproj.GenerateResource.cache
+C:\Users\Jackson\Documents\GitHub\osu-song-player\obj\Debug\osu-song-player.csproj.CoreCompileInputs.cache
+C:\Users\Jackson\Documents\GitHub\osu-song-player\obj\Debug\osu-song-player.exe
+C:\Users\Jackson\Documents\GitHub\osu-song-player\obj\Debug\osu-song-player.pdb
