@@ -58,14 +58,14 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="25"/>
+                <RowDefinition Height="30"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="30"/>
             </Grid.RowDefinitions>
 
             <DockPanel Margin="5 0">
-                <Label Content="Playlists" Width="55" HorizontalAlignment="Left"/>
-                <Label Content="0" HorizontalAlignment="Right"/>
+                <Label Content="Playlists" Width="55" HorizontalAlignment="Left"  VerticalContentAlignment="Bottom"/>
+                <Label Content="0" HorizontalAlignment="Right"  VerticalContentAlignment="Bottom"/>
             </DockPanel>
             <ListBox Name="playlistListBox" Grid.Row="1" Margin="5 0" HorizontalContentAlignment="Stretch">
                 <ListBoxItem>
@@ -85,16 +85,16 @@
             </StackPanel>
 
             <DockPanel Grid.Column="1">
-                <Label Content="Playlist name"/>
-                <Label Content="500 Songs" Width="100" HorizontalAlignment="Right" HorizontalContentAlignment="Right"/>
+                <Label Content="Playlist name"  VerticalContentAlignment="Bottom"/>
+                <Label Content="500 Songs" Width="100" HorizontalAlignment="Right" HorizontalContentAlignment="Right" VerticalContentAlignment="Bottom"/>
             </DockPanel>
 
-            <ListBox Name="songListBox" Grid.Column="1" Grid.Row="1" HorizontalContentAlignment="Stretch" ItemsSource="{Binding songs}">
+            <ListBox Name="songListBox" Grid.Column="1" Grid.Row="1" HorizontalContentAlignment="Stretch" ItemsSource="{Binding Songs}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <DockPanel>
                             <Label Content="{Binding Order, Mode=OneWay}"/>
-                            <Label DockPanel.Dock="Right" Grid.Column="2" Content="{Binding Length, Mode=OneWay}"/>
+                            <Label DockPanel.Dock="Right" Grid.Column="2" Content="{Binding Artist, Mode=OneWay}"/>
                             <Label Grid.Column="1" Content="{Binding Name, Mode=OneWay}"/>
                         </DockPanel>
                     </DataTemplate>
@@ -105,7 +105,7 @@
                 <Button Width="50" Margin="0 5 5 5">
                     Delete
                 </Button>
-                <Button Width="50" Margin="5 5">
+                <Button Width="50" Margin="5 5" Click="Button_Click">
                     Refresh
                 </Button>
             </StackPanel>

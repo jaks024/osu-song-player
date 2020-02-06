@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -20,16 +19,17 @@ namespace osu_song_player
 	/// </summary>
 	public partial class MainWindow : Window
 	{
-
-		public List<SongViewModel> songs { get; } = new List<SongViewModel>();
+		private SongFolderCrawler songFolderCrawler;
 		public string selectedFolderPath;
 		public MainWindow()
 		{
 			InitializeComponent();
-			songListBox.DataContext = this;
+			songFolderCrawler = new SongFolderCrawler(songListBox);
+			songListBox.DataContext = songFolderCrawler;
 
 		}
 
+		List<SongViewModel> temp = new List<SongViewModel>();
 		private void SelectPathBtn_Click(object sender, RoutedEventArgs e)
 		{
 			var dialog = new System.Windows.Forms.FolderBrowserDialog();
@@ -40,15 +40,17 @@ namespace osu_song_player
 					selectedFolderPath = dialog.SelectedPath;
 					selectedPathTextBlock.Text = selectedFolderPath;
 
-					List<string> folders = SongFolderCrawler.Search(selectedFolderPath);
-					for(int i = 0; i < folders.Count; i++)
-					{
-						songs.Add(new SongViewModel(i, folders[i], folders[i].Length.ToString(), folders[i])); 
-					}
-					songListBox.Items.Refresh();
+					songFolderCrawler.SearchThreaded(selectedFolderPath);
 				}
 				
 			}
+		}
+
+		private void Button_Click(object sender, RoutedEventArgs e)
+		{
+			songListBox.ItemsSource = songFolderCrawler.Songs;
+			songListBox.Items.Refresh();
+			Console.WriteLine("refereshed");
 		}
 	}
 }
