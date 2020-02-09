@@ -27,11 +27,11 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            <Button Name="ctrlPlayBtn" Margin="5">Play</Button>
-            <Button Name="ctrlPauseBtn" Grid.Column="1" Margin="5">Pause</Button>
-            <Button Name="ctrlStopBtn" Grid.Column="2" Margin="5">Stop</Button>
+            <Button Name="ctrlPlayBtn" Margin="5" Click="CtrlPlayBtn_Click">Play</Button>
+            <Button Name="ctrlPauseBtn" Grid.Column="1" Margin="5" Click="CtrlPauseBtn_Click">Pause</Button>
+            <Button Name="ctrlStopBtn" Grid.Column="2" Margin="5" Click="CtrlStopBtn_Click">Stop</Button>
 
-            <Grid Grid.Column="3" VerticalAlignment="Center">
+            <Grid Name="songInfoGrid" Grid.Column="3" VerticalAlignment="Center">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="25"/>
                     <RowDefinition Height="25"/>
@@ -42,20 +42,21 @@
                     <ColumnDefinition Width="50"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Column="1" TextAlignment="Center" VerticalAlignment="Bottom">
-                    song name - artist
-                </TextBlock>
+                <Label Name="nameArtistTextBlock" Grid.Column="1" HorizontalContentAlignment="Center" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch"
+                           Content="{Binding SongInfo.NameAndArtist, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
 
-                <Label Grid.Row="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right" Content="2:22"/>
-                <Slider Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Value="2"></Slider>
-                <Label Grid.Row="1" Grid.Column="2" Content="5:00"/>
+                <Label Grid.Row="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right" Content="{Binding PositionInTime, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+                <Slider Name="timeSlider" Grid.Row="1" Grid.Column="1" VerticalAlignment="Center"
+                        Minimum="0" Maximum="{Binding TimeInSeconds}" Value="{Binding Position, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></Slider>
+                <Label Name="lengthLabel" Grid.Row="1" Grid.Column="2" Content="{Binding SongInfo.Length, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
             </Grid>
         </Grid>
 
         <Grid Name="centralGrid" Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="17*"/>
+                <ColumnDefinition Width="279*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="30"/>
@@ -84,12 +85,13 @@
                 </Button>
             </StackPanel>
 
-            <DockPanel Grid.Column="1">
+            <DockPanel Grid.Column="1" Grid.ColumnSpan="2">
                 <Label Content="Playlist name"  VerticalContentAlignment="Bottom"/>
                 <Label Content="500 Songs" Width="100" HorizontalAlignment="Right" HorizontalContentAlignment="Right" VerticalContentAlignment="Bottom"/>
             </DockPanel>
 
-            <ListBox Name="songListBox" Grid.Column="1" Grid.Row="1" HorizontalContentAlignment="Stretch" ItemsSource="{Binding Songs}">
+            <ListBox Name="songListBox" Grid.Column="1" Grid.Row="1" HorizontalContentAlignment="Stretch" ItemsSource="{Binding Songs}"
+                     SelectionChanged="SongListBox_SelectionChanged" Grid.ColumnSpan="2">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <DockPanel>
@@ -101,11 +103,11 @@
                 </ListBox.ItemTemplate>
             </ListBox>
 
-            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
+            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
                 <Button Width="50" Margin="0 5 5 5">
                     Delete
                 </Button>
-                <Button Width="50" Margin="5 5" Click="Button_Click">
+                <Button Width="50" Margin="5 5">
                     Refresh
                 </Button>
             </StackPanel>
@@ -118,7 +120,7 @@
             <TextBlock Name="selectedPathTextBlock" Grid.Column="1" Margin="5" VerticalAlignment="Center">
                 osu! song folder: C:\Users\Documents\GitHub\osu-song-player
             </TextBlock>
-
+            <ComboBox Name="audioOutputComboBox" Margin="5"/>
         </StackPanel>
     </Grid>
 </Window>

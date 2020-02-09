@@ -28,3 +28,6 @@ E:\GitHub\osu-song-player\obj\Debug\osu-song-player.csproj.GenerateResource.cach
 E:\GitHub\osu-song-player\obj\Debug\osu-song-player.csproj.CoreCompileInputs.cache
 E:\GitHub\osu-song-player\obj\Debug\osu-song-player.exe
 E:\GitHub\osu-song-player\obj\Debug\osu-song-player.pdb
+E:\GitHub\osu-song-player\bin\Debug\CSCore.dll
+E:\GitHub\osu-song-player\bin\Debug\CSCore.xml
+E:\GitHub\osu-song-player\obj\Debug\osu-song-player.csproj.CopyComplete

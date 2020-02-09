@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -9,10 +10,10 @@ using System.Windows.Controls;
 
 namespace osu_song_player
 {
-	public class SongFolderCrawler
+	public class SongFolderCrawler : ViewModelBase
 	{
-		private List<SongViewModel> _songs = new List<SongViewModel>();
-		public List<SongViewModel> Songs { get => _songs; }
+		private ObservableCollection<SongViewModel> _songs;
+		public ObservableCollection<SongViewModel> Songs { get => _songs;}
 		private ListBox listbox;
 		public SongFolderCrawler(ListBox lb)
 		{
@@ -20,7 +21,7 @@ namespace osu_song_player
 		}
 		private void Search(string path)
 		{
-			_songs = new List<SongViewModel>();
+			_songs = new ObservableCollection<SongViewModel>();
 			int songCount = 0;
 			string[] directories = Directory.GetDirectories(path);
 			foreach (var d in directories)
@@ -47,12 +48,14 @@ namespace osu_song_player
 						}
 						lineCount++;
 					}
-					SongViewModel song = new SongViewModel(songCount, title, artist, new DirectoryInfo(audioName).Name + "/" + audioName);
+					SongViewModel song = new SongViewModel(songCount, title, artist, new DirectoryInfo(d).Name + "\\"+ audioName);
 					Console.WriteLine(song);
 					_songs.Add(song);
 					songCount++;
 				}
 			}
+			NotifyPropertyChanged("Songs");
+			//listbox.Dispatcher.Invoke(UpdateListBox);
 			Console.WriteLine("*********************" + Songs.Count);
 		}
 
