@@ -49,7 +49,12 @@ namespace osu_song_player
 		}
 		public string PositionInTime
 		{
-			get => waveSource.GetPosition().ToString(@"mm\:ss");
+			get
+			{
+				if(waveSource != null)
+					return waveSource.GetPosition().ToString(@"mm\:ss");
+				return "00:00";
+			}
 		}
 
 		public void Update()
@@ -74,7 +79,13 @@ namespace osu_song_player
 			NotifyPropertyChanged("Position");
 			NotifyPropertyChanged("PositionInTime");
 		}
-
+		public void SetDevice(MMDevice device)
+		{
+			soundOut = new WasapiOut { Latency = 100, Device = device };
+			if(waveSource != null)
+				soundOut.Initialize(waveSource);
+			Console.WriteLine("changed device to " + device);
+		}
 		public void Play()
 		{
 			if (soundOut != null)
@@ -91,7 +102,7 @@ namespace osu_song_player
 				soundOut.Stop();
 		}
 
-		public void Change()
+		public void End()
 		{
 			Stop();
 			CleanUp();

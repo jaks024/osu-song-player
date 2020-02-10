@@ -24,21 +24,35 @@ namespace osu_song_player
 	public partial class MainWindow : Window
 	{
 		private readonly MusicPlayer musicPlayer = new MusicPlayer();
-		private SongFolderCrawler songFolderCrawler;
+		private readonly UserConfigManager userConfigManager = new UserConfigManager();
+		private readonly SongFolderCrawler songFolderCrawler = new SongFolderCrawler();
 		public string selectedFolderPath;
 		private readonly ObservableCollection<MMDevice> devices = new ObservableCollection<MMDevice>();
 		System.Windows.Threading.DispatcherTimer dispatcherTimer;
 		public MainWindow()
 		{
 			InitializeComponent();
-			LoadDevices();
-			songFolderCrawler = new SongFolderCrawler(songListBox);
+			LoadDevices(); //cscore
+
+			userConfigManager.DeserializeConfig();
+			if (!userConfigManager.IsConfigEmpty)
+			{
+				LoadSongFolderOperation(userConfigManager.Config.folderPath);
+			}
 			songListBox.DataContext = songFolderCrawler;
 			songInfoGrid.DataContext = musicPlayer;
 
 			dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
 			dispatcherTimer.Tick += dispatcherTimer_Tick;
 			dispatcherTimer.Interval = new TimeSpan(0, 0, 1);
+
+			this.Closed += new EventHandler(ClosingCleanUp);
+
+		}
+
+		private void ClosingCleanUp(object sender, EventArgs e)
+		{
+			musicPlayer.End();
 		}
 
 		List<SongViewModel> temp = new List<SongViewModel>();
@@ -49,14 +63,21 @@ namespace osu_song_player
 			{
 				if (!dialog.SelectedPath.Equals(selectedFolderPath))
 				{
-					selectedFolderPath = dialog.SelectedPath;
-					selectedPathTextBlock.Text = selectedFolderPath;
-
-					songFolderCrawler.SearchThreaded(selectedFolderPath);
+					LoadSongFolderOperation(dialog.SelectedPath);
 				}
 				
 			}
 		}
+
+		private void LoadSongFolderOperation(string path)
+		{
+			selectedFolderPath = path;
+			selectedPathTextBlock.Text = path;
+
+			songFolderCrawler.SearchThreaded(path);
+			userConfigManager.SerializeConfig(path);
+		}
+
 
 		private void LoadDevices()
 		{
@@ -93,7 +114,7 @@ namespace osu_song_player
 
 		private void SongListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			musicPlayer.Change();
+			musicPlayer.End();
 
 			SongViewModel song = (SongViewModel)songListBox.SelectedItem;
 			Console.WriteLine("playing: " + selectedFolderPath + "\\" + song.Path);
@@ -106,5 +127,24 @@ namespace osu_song_player
 			musicPlayer.Update();
 		}
 
+		private void AudioOutputComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			if (audioOutputComboBox.SelectedItem != null)
+			{
+				musicPlayer.Stop();
+				musicPlayer.SetDevice((MMDevice)audioOutputComboBox.SelectedItem);
+			}
+		}
+
+		private void TimeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+		{
+			musicPlayer.Update();
+			//musicPlayer.Pause();
+		}
+
+		private void TimeSlider_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
+		{
+			//musicPlayer.Play();
+		}
 	}
 }

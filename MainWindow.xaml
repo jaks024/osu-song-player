@@ -42,11 +42,11 @@
                     <ColumnDefinition Width="50"/>
                 </Grid.ColumnDefinitions>
 
-                <Label Name="nameArtistTextBlock" Grid.Column="1" HorizontalContentAlignment="Center" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch"
-                           Content="{Binding SongInfo.NameAndArtist, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBlock Name="nameArtistTextBlock" Grid.Column="1"  HorizontalAlignment="Stretch" TextAlignment="Center" VerticalAlignment="Bottom"
+                           Text="{Binding SongInfo.NameAndArtist, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
 
                 <Label Grid.Row="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right" Content="{Binding PositionInTime, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <Slider Name="timeSlider" Grid.Row="1" Grid.Column="1" VerticalAlignment="Center"
+                <Slider Name="timeSlider" Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" ValueChanged="TimeSlider_ValueChanged" Thumb.DragCompleted="TimeSlider_DragCompleted"
                         Minimum="0" Maximum="{Binding TimeInSeconds}" Value="{Binding Position, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></Slider>
                 <Label Name="lengthLabel" Grid.Row="1" Grid.Column="2" Content="{Binding SongInfo.Length, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
             </Grid>
@@ -120,7 +120,7 @@
             <TextBlock Name="selectedPathTextBlock" Grid.Column="1" Margin="5" VerticalAlignment="Center">
                 osu! song folder: C:\Users\Documents\GitHub\osu-song-player
             </TextBlock>
-            <ComboBox Name="audioOutputComboBox" Margin="5"/>
+            <ComboBox Name="audioOutputComboBox" Margin="5" SelectionChanged="AudioOutputComboBox_SelectionChanged"/>
         </StackPanel>
     </Grid>
 </Window>

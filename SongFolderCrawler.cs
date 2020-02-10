@@ -12,21 +12,18 @@ namespace osu_song_player
 {
 	public class SongFolderCrawler : ViewModelBase
 	{
-		private ObservableCollection<SongViewModel> _songs;
-		public ObservableCollection<SongViewModel> Songs { get => _songs;}
-		private ListBox listbox;
-		public SongFolderCrawler(ListBox lb)
-		{
-			listbox = lb;
-		}
+		public ObservableCollection<SongViewModel> Songs { get; private set; }
+
 		private void Search(string path)
 		{
-			_songs = new ObservableCollection<SongViewModel>();
+			ObservableCollection<SongViewModel> songs = new ObservableCollection<SongViewModel>();
 			int songCount = 0;
 			string[] directories = Directory.GetDirectories(path);
 			foreach (var d in directories)
 			{
 				string[] meta = Directory.GetFiles(d, "*.osu", SearchOption.TopDirectoryOnly);
+				if (meta.Length == 0)
+					continue;
 				using(StreamReader s = new StreamReader(meta[0])){
 					int lineCount = 0;
 					string line, audioName, title, artist;
@@ -50,13 +47,13 @@ namespace osu_song_player
 					}
 					SongViewModel song = new SongViewModel(songCount, title, artist, new DirectoryInfo(d).Name + "\\"+ audioName);
 					Console.WriteLine(song);
-					_songs.Add(song);
+					songs.Add(song);
 					songCount++;
 				}
 			}
+			Songs = songs;
 			NotifyPropertyChanged("Songs");
-			//listbox.Dispatcher.Invoke(UpdateListBox);
-			Console.WriteLine("*********************" + Songs.Count);
+			Console.WriteLine("*********************" + songs.Count);
 		}
 
 		public void SearchThreaded(string path)

@@ -31,3 +31,5 @@ E:\GitHub\osu-song-player\obj\Debug\osu-song-player.pdb
 E:\GitHub\osu-song-player\bin\Debug\CSCore.dll
 E:\GitHub\osu-song-player\bin\Debug\CSCore.xml
 E:\GitHub\osu-song-player\obj\Debug\osu-song-player.csproj.CopyComplete
+E:\GitHub\osu-song-player\bin\Debug\Newtonsoft.Json.dll
+E:\GitHub\osu-song-player\bin\Debug\Newtonsoft.Json.xml
