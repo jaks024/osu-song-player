@@ -32,5 +32,12 @@ namespace osu_song_player
 		{
 			return string.Format("{0}: {1} - {2}, {3}, {4}", _order, _name, _artist, _length, _audioName);
 		}
+
+		//not override because it throws castexception in listbox 
+		public bool CheckEquals(object obj)
+		{
+			SongViewModel s = (SongViewModel)obj;
+			return _order == s._order && NameAndArtist.Equals(s.NameAndArtist);
+		}
 	}
 }

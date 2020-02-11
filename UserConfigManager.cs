@@ -14,15 +14,20 @@ namespace osu_song_player
 		private UserConfig config;
 		public UserConfig Config { get => config; }
 		public bool IsConfigEmpty { get; private set; } = true;
-		public void SerializeConfig(string path)
+		public void SetOutputDeviceId(string device)
+		{
+			config.outputDeviceId = device;
+		}
+		public void SerializeConfig(string path, string outputDevice)
 		{
 			config.folderPath = path;
+			config.outputDeviceId = outputDevice;
 			if (!config.folderPath.Equals(string.Empty))
 				IsConfigEmpty = false;
 
 			using(StreamWriter sw = File.CreateText(configFileName))
 			{
-				sw.Write(JsonConvert.SerializeObject(config));
+				sw.Write(JsonConvert.SerializeObject(config, Formatting.Indented));
 				Console.WriteLine("serialized config to config.json");
 			}
 		}
@@ -57,5 +62,6 @@ namespace osu_song_player
 	public struct UserConfig
 	{
 		public string folderPath;
+		public string outputDeviceId;
 	}
 }

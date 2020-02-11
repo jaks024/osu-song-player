@@ -46,7 +46,9 @@
                            Text="{Binding SongInfo.NameAndArtist, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
 
                 <Label Grid.Row="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right" Content="{Binding PositionInTime, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <Slider Name="timeSlider" Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" ValueChanged="TimeSlider_ValueChanged" Thumb.DragCompleted="TimeSlider_DragCompleted"
+                <Slider Name="timeSlider" Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" 
+                        Thumb.DragStarted="TimeSlider_DragStarted" Thumb.DragDelta="TimeSlider_DragDelta" Thumb.DragCompleted="TimeSlider_DragCompleted"
+                        IsMoveToPointEnabled="True"
                         Minimum="0" Maximum="{Binding TimeInSeconds}" Value="{Binding Position, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></Slider>
                 <Label Name="lengthLabel" Grid.Row="1" Grid.Column="2" Content="{Binding SongInfo.Length, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
             </Grid>
@@ -55,8 +57,9 @@
         <Grid Name="centralGrid" Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200"/>
-                <ColumnDefinition Width="17*"/>
-                <ColumnDefinition Width="279*"/>
+                <ColumnDefinition Width="34*"/>
+                <ColumnDefinition Width="185*"/>
+                <ColumnDefinition Width="373*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="30"/>
@@ -85,13 +88,14 @@
                 </Button>
             </StackPanel>
 
-            <DockPanel Grid.Column="1" Grid.ColumnSpan="2">
+            <DockPanel Grid.Column="1" Grid.ColumnSpan="3">
                 <Label Content="Playlist name"  VerticalContentAlignment="Bottom"/>
                 <Label Content="500 Songs" Width="100" HorizontalAlignment="Right" HorizontalContentAlignment="Right" VerticalContentAlignment="Bottom"/>
             </DockPanel>
 
             <ListBox Name="songListBox" Grid.Column="1" Grid.Row="1" HorizontalContentAlignment="Stretch" ItemsSource="{Binding Songs}"
-                     SelectionChanged="SongListBox_SelectionChanged" Grid.ColumnSpan="2">
+                     SelectionMode="Single"
+                     SelectionChanged="SongListBox_SelectionChanged" Grid.ColumnSpan="3" SelectedIndex="0">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <DockPanel>
@@ -103,7 +107,7 @@
                 </ListBox.ItemTemplate>
             </ListBox>
 
-            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
+            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="3">
                 <Button Width="50" Margin="0 5 5 5">
                     Delete
                 </Button>

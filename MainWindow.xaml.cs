@@ -29,6 +29,7 @@ namespace osu_song_player
 		public string selectedFolderPath;
 		private readonly ObservableCollection<MMDevice> devices = new ObservableCollection<MMDevice>();
 		System.Windows.Threading.DispatcherTimer dispatcherTimer;
+		private SongViewModel currentSong;
 		public MainWindow()
 		{
 			InitializeComponent();
@@ -37,7 +38,19 @@ namespace osu_song_player
 			userConfigManager.DeserializeConfig();
 			if (!userConfigManager.IsConfigEmpty)
 			{
-				LoadSongFolderOperation(userConfigManager.Config.folderPath);
+				LoadSongsFromPath(userConfigManager.Config.folderPath);
+
+				if(userConfigManager.Config.outputDeviceId != null)
+				{
+					for(int i = 0; i < devices.Count; i++)
+					{
+						if (userConfigManager.Config.outputDeviceId.Equals(devices[i].DeviceID))
+						{
+							audioOutputComboBox.SelectedIndex = i;
+							Console.WriteLine("audio device loaded from config");
+						}
+					}
+				}
 			}
 			songListBox.DataContext = songFolderCrawler;
 			songInfoGrid.DataContext = musicPlayer;
@@ -53,6 +66,7 @@ namespace osu_song_player
 		private void ClosingCleanUp(object sender, EventArgs e)
 		{
 			musicPlayer.End();
+			SerializeConfig();
 		}
 
 		List<SongViewModel> temp = new List<SongViewModel>();
@@ -63,21 +77,27 @@ namespace osu_song_player
 			{
 				if (!dialog.SelectedPath.Equals(selectedFolderPath))
 				{
-					LoadSongFolderOperation(dialog.SelectedPath);
+					LoadSongsFromPath(dialog.SelectedPath);
+
+					//if path changed, save it to config
+					SerializeConfig();
 				}
 				
 			}
 		}
 
-		private void LoadSongFolderOperation(string path)
+		private void LoadSongsFromPath(string path)
 		{
 			selectedFolderPath = path;
 			selectedPathTextBlock.Text = path;
 
 			songFolderCrawler.SearchThreaded(path);
-			userConfigManager.SerializeConfig(path);
 		}
 
+		private void SerializeConfig()
+		{
+			userConfigManager.SerializeConfig(selectedFolderPath, ((MMDevice)audioOutputComboBox.SelectedItem).DeviceID);
+		}
 
 		private void LoadDevices()
 		{
@@ -96,8 +116,17 @@ namespace osu_song_player
 			audioOutputComboBox.SelectedIndex = 0;
 		}
 
-		private void CtrlPlayBtn_Click(object sender, RoutedEventArgs e)
+		private void CtrlPlayBtn_Click(object sender, RoutedEventArgs e) 
 		{
+			SongViewModel selected = (SongViewModel)songListBox.SelectedItem;
+			if (!musicPlayer.HasAudio || !currentSong.CheckEquals(selected))
+			{
+				currentSong = selected;
+				Console.WriteLine("playing: " + selectedFolderPath + "\\" + currentSong.Path);
+				musicPlayer.Open(currentSong, selectedFolderPath + "\\" + currentSong.Path, (MMDevice)audioOutputComboBox.SelectedItem);
+				Console.WriteLine((MMDevice)audioOutputComboBox.SelectedItem);
+			}
+		
 			musicPlayer.Play();
 			dispatcherTimer.Start();
 		}
@@ -114,12 +143,8 @@ namespace osu_song_player
 
 		private void SongListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			musicPlayer.End();
-
-			SongViewModel song = (SongViewModel)songListBox.SelectedItem;
-			Console.WriteLine("playing: " + selectedFolderPath + "\\" + song.Path);
-			musicPlayer.Open(song, selectedFolderPath + "\\" + song.Path, (MMDevice)audioOutputComboBox.SelectedItem);
-			Console.WriteLine((MMDevice)audioOutputComboBox.SelectedItem);
+			//musicPlayer.End();
+			//maybe add currently selected name to top
 		}
 
 		private void dispatcherTimer_Tick(object sender, EventArgs e)
@@ -133,18 +158,30 @@ namespace osu_song_player
 			{
 				musicPlayer.Stop();
 				musicPlayer.SetDevice((MMDevice)audioOutputComboBox.SelectedItem);
+				userConfigManager.SetOutputDeviceId(((MMDevice)audioOutputComboBox.SelectedItem).DeviceID);
 			}
 		}
 
-		private void TimeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+		private bool tempIsPreviouslyPlaying = false;
+
+		private void TimeSlider_DragStarted(object sender, System.Windows.Controls.Primitives.DragStartedEventArgs e)
+		{
+			tempIsPreviouslyPlaying = musicPlayer.IsPlaying;
+			musicPlayer.Pause();
+			Console.WriteLine("started drag");
+		}
+
+		private void TimeSlider_DragDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e)
 		{
 			musicPlayer.Update();
-			//musicPlayer.Pause();
+			Console.WriteLine("dragging");
 		}
 
 		private void TimeSlider_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
 		{
-			//musicPlayer.Play();
+			if (tempIsPreviouslyPlaying)
+				musicPlayer.Play();
+			Console.WriteLine("finish drag");
 		}
 	}
 }

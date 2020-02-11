@@ -14,7 +14,8 @@ namespace osu_song_player
 		private ISoundOut soundOut;
 		private IWaveSource waveSource;
 		private SongViewModel song;
-
+		public bool HasAudio { get; private set; }
+		public bool IsPlaying { get; private set; }
 		public SongViewModel SongInfo
 		{
 			get => song;
@@ -78,6 +79,8 @@ namespace osu_song_player
 			NotifyPropertyChanged("TimeInSeconds");
 			NotifyPropertyChanged("Position");
 			NotifyPropertyChanged("PositionInTime");
+
+			HasAudio = true;
 		}
 		public void SetDevice(MMDevice device)
 		{
@@ -88,22 +91,33 @@ namespace osu_song_player
 		}
 		public void Play()
 		{
-			if (soundOut != null)
+			if (soundOut != null && HasAudio)
+			{
 				soundOut.Play();
+				IsPlaying = true;
+			}
 		}
 		public void Pause()
 		{
-			if (soundOut != null)
+			if (soundOut != null && HasAudio)
+			{
 				soundOut.Pause();
+				IsPlaying = false;
+			}
 		}
 		public void Stop()
 		{
-			if (soundOut != null)
+			if (soundOut != null && HasAudio)
+			{
 				soundOut.Stop();
+				IsPlaying = false;
+			}
 		}
 
 		public void End()
 		{
+			HasAudio = false;
+			IsPlaying = false;
 			Stop();
 			CleanUp();
 		}
