@@ -10,7 +10,7 @@ using System.Windows.Controls;
 
 namespace osu_song_player
 {
-	public class SongFolderCrawler : ViewModelBase
+	public class SongFolderCrawler
 	{
 		public ObservableCollection<SongViewModel> Songs { get; private set; }
 
@@ -21,10 +21,11 @@ namespace osu_song_player
 			string[] directories = Directory.GetDirectories(path);
 			foreach (var d in directories)
 			{
-				string[] meta = Directory.GetFiles(d, "*.osu", SearchOption.TopDirectoryOnly);
-				if (meta.Length == 0)
+				IEnumerable<string> meta = Directory.EnumerateFiles(d, "*.osu", SearchOption.TopDirectoryOnly);
+				string element = meta.FirstOrDefault();
+				if (element == null || element.Length == 0)
 					continue;
-				using(StreamReader s = new StreamReader(meta[0])){
+				using(StreamReader s = new StreamReader(element)){
 					int lineCount = 0;
 					string line, audioName, title, artist;
 					line = audioName = title = artist = "";
@@ -52,13 +53,13 @@ namespace osu_song_player
 				}
 			}
 			Songs = songs;
-			NotifyPropertyChanged("Songs");
 			Console.WriteLine("*********************" + songs.Count);
 		}
 
 		public void SearchThreaded(string path)
 		{
 			Thread t = new Thread(() => Search(path));
+			t.IsBackground = true;
 			t.Start();
 		}
 

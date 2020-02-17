@@ -71,14 +71,18 @@
                 <Label Content="Playlists" Width="55" HorizontalAlignment="Left"  VerticalContentAlignment="Bottom"/>
                 <Label Content="0" HorizontalAlignment="Right"  VerticalContentAlignment="Bottom"/>
             </DockPanel>
-            <ListBox Name="playlistListBox" Grid.Row="1" Margin="5 0" HorizontalContentAlignment="Stretch">
-                <ListBoxItem>
-                    <Label Content="My Favourites"/>
-                </ListBoxItem>
-                <ListBoxItem >
-                    <Label Content="My Favourites"/>
-                </ListBoxItem>
+            
+            
+            <ListBox Name="playlistListBox" Grid.Row="1" Margin="5 0" HorizontalContentAlignment="Stretch"
+                     SelectionChanged="PlaylistListBox_SelectionChanged">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Label Content="{Binding Name}"></Label>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
             </ListBox>
+            
+            
             <StackPanel Orientation="Horizontal" Grid.Row="2">
                 <Button Width="50" Margin="5">
                     Delete
@@ -86,11 +90,14 @@
                 <Button Width="50" Margin="5">
                     Rename
                 </Button>
+                <Button Width="50" Margin="5" Click="Button_Click">
+                    Save
+                </Button>
             </StackPanel>
 
-            <DockPanel Grid.Column="1" Grid.ColumnSpan="3">
-                <Label Content="Playlist name"  VerticalContentAlignment="Bottom"/>
-                <Label Content="500 Songs" Width="100" HorizontalAlignment="Right" HorizontalContentAlignment="Right" VerticalContentAlignment="Bottom"/>
+            <DockPanel Name="playlistInfoPanel" Grid.Column="1" Grid.ColumnSpan="3">
+                <Label Content="{Binding Name}"  VerticalContentAlignment="Bottom"/>
+                <Label Content="{Binding SongCount}" Width="100" HorizontalAlignment="Right" HorizontalContentAlignment="Right" VerticalContentAlignment="Bottom"/>
             </DockPanel>
 
             <ListBox Name="songListBox" Grid.Column="1" Grid.Row="1" HorizontalContentAlignment="Stretch" ItemsSource="{Binding Songs}"

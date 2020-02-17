@@ -17,8 +17,12 @@ namespace osu_song_player
 		public int Order { get => _order; set => SetProperty(ref _order, value); }
 		public string Name { get => _name; set => SetProperty(ref _name, value); }
 		public string Artist { get => _artist; set => SetProperty(ref _artist, value); }
+
+		[Newtonsoft.Json.JsonIgnore]
 		public string Length { get => _length; set => SetProperty(ref _length, value); }
 		public string Path { get => _audioName; set => SetProperty(ref _audioName, value); }
+
+		[Newtonsoft.Json.JsonIgnore]
 		public string NameAndArtist { get => _name + " - " + _artist;}
 		public SongViewModel(int order, string name, string artist, string audioName)
 		{

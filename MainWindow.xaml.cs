@@ -26,19 +26,31 @@ namespace osu_song_player
 		private readonly MusicPlayer musicPlayer = new MusicPlayer();
 		private readonly UserConfigManager userConfigManager = new UserConfigManager();
 		private readonly SongFolderCrawler songFolderCrawler = new SongFolderCrawler();
+		private readonly PlaylistSerializer serializer = new PlaylistSerializer();
 		public string selectedFolderPath;
 		private readonly ObservableCollection<MMDevice> devices = new ObservableCollection<MMDevice>();
+		private ObservableCollection<PlaylistItemViewModel> playlistItems = new ObservableCollection<PlaylistItemViewModel>();
 		System.Windows.Threading.DispatcherTimer dispatcherTimer;
 		private SongViewModel currentSong;
+		public PlaylistViewModel currentPlaylist = new PlaylistViewModel();
 		public MainWindow()
 		{
 			InitializeComponent();
 			LoadDevices(); //cscore
 
+			playlistItems = new ObservableCollection<PlaylistItemViewModel>(serializer.GetAllPlaylists());
+			playlistListBox.ItemsSource = playlistItems;
+
 			userConfigManager.DeserializeConfig();
 			if (!userConfigManager.IsConfigEmpty)
 			{
-				LoadSongsFromPath(userConfigManager.Config.folderPath);
+				if(playlistItems.Count == 0)
+					LoadSongsFromPath(userConfigManager.Config.folderPath);
+				else
+				{
+					selectedFolderPath = userConfigManager.Config.folderPath;
+					selectedPathTextBlock.Text = userConfigManager.Config.folderPath;
+				}
 
 				if(userConfigManager.Config.outputDeviceId != null)
 				{
@@ -52,7 +64,9 @@ namespace osu_song_player
 					}
 				}
 			}
-			songListBox.DataContext = songFolderCrawler;
+
+			playlistInfoPanel.DataContext = currentPlaylist;
+			songListBox.DataContext = currentPlaylist;
 			songInfoGrid.DataContext = musicPlayer;
 
 			dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
@@ -66,7 +80,7 @@ namespace osu_song_player
 		private void ClosingCleanUp(object sender, EventArgs e)
 		{
 			musicPlayer.End();
-			SerializeConfig();
+			//SerializeConfig();
 		}
 
 		List<SongViewModel> temp = new List<SongViewModel>();
@@ -182,6 +196,24 @@ namespace osu_song_player
 			if (tempIsPreviouslyPlaying)
 				musicPlayer.Play();
 			Console.WriteLine("finish drag");
+		}
+
+		private void Button_Click(object sender, RoutedEventArgs e)
+		{
+			PlaylistSerializer serializer = new PlaylistSerializer();
+			PlaylistViewModel playlist = new PlaylistViewModel();
+			playlist.Songs = songFolderCrawler.Songs;
+			playlist.SongCount = songFolderCrawler.Songs.Count;
+			playlist.Name = "all_songs";
+			serializer.Serialize(playlist);
+		}
+
+		private void PlaylistListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			PlaylistItemViewModel item = playlistItems[playlistListBox.SelectedIndex];
+			PlaylistViewModel playlist = serializer.DeserializePlaylist(item.Path);
+			if(playlist != null)
+				currentPlaylist.UpdateProperties(playlist);
 		}
 	}
 }
