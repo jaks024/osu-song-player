@@ -13,7 +13,7 @@ namespace osu_song_player
 	public class SongFolderCrawler
 	{
 		public ObservableCollection<SongViewModel> Songs { get; private set; }
-
+		public bool searchCompleted;
 		private void Search(string path)
 		{
 			ObservableCollection<SongViewModel> songs = new ObservableCollection<SongViewModel>();
@@ -53,15 +53,25 @@ namespace osu_song_player
 				}
 			}
 			Songs = songs;
+			searchCompleted = true;
 			Console.WriteLine("*********************" + songs.Count);
 		}
-
 		public void SearchThreaded(string path)
 		{
+			//Thread t = new Thread(Temporary);
 			Thread t = new Thread(() => Search(path));
 			t.IsBackground = true;
 			t.Start();
 		}
 
+		//public void Temporary()
+		//{
+		//	for (int i = 0; i < 5; i++)
+		//	{
+		//		Thread.Sleep(1000);
+		//		Console.WriteLine(i);
+		//	}
+		//	searchCompleted = true;
+		//}
 	}
 }

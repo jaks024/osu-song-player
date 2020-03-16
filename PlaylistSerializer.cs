@@ -39,6 +39,12 @@ namespace osu_song_player
 			return items;
 		}
 
+		public string GetPlaylistPath(PlaylistViewModel playlist)
+		{
+			string path = Path.Combine(Directory.GetCurrentDirectory(), directoryName);
+			return string.Format("{0}\\{1}{2}", path, playlist.Name, jsonExtension);
+		}
+
 		public PlaylistViewModel DeserializePlaylist(string path)
 		{
 			//string path = Path.Combine(Directory.GetCurrentDirectory(), directoryName, name);
@@ -54,6 +60,7 @@ namespace osu_song_player
 				{
 					return null;
 				}
+				Console.WriteLine("playlist deserialized: " + path);
 				return JsonConvert.DeserializeObject<PlaylistViewModel>(content);
 			}
 		}

@@ -14,10 +14,10 @@ namespace osu_song_player
 		public string Path { get; set; }
 
 
-		public PlaylistItemViewModel(string n, string p)
+		public PlaylistItemViewModel(string name, string path)
 		{
-			Name = n;
-			Path = p;
+			Name = name;
+			Path = path;
 		}
 	}
 }

@@ -62,11 +62,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="PlaylistCreator.cs" />
     <Compile Include="PlaylistItemViewModel.cs" />
     <Compile Include="PlaylistSerializer.cs" />
     <Compile Include="PlaylistViewModel.cs" />
     <Compile Include="SongFolderCrawler.cs" />
     <Compile Include="MusicPlayer.cs" />
+    <Compile Include="SongSearcher.cs" />
     <Compile Include="SongViewModel.cs" />
     <Compile Include="UserConfigManager.cs" />
     <Compile Include="ViewModelBase.cs" />

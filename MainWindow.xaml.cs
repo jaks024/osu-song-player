@@ -27,6 +27,7 @@ namespace osu_song_player
 		private readonly UserConfigManager userConfigManager = new UserConfigManager();
 		private readonly SongFolderCrawler songFolderCrawler = new SongFolderCrawler();
 		private readonly PlaylistSerializer serializer = new PlaylistSerializer();
+		private readonly PlaylistCreator creator = new PlaylistCreator();
 		public string selectedFolderPath;
 		private readonly ObservableCollection<MMDevice> devices = new ObservableCollection<MMDevice>();
 		private ObservableCollection<PlaylistItemViewModel> playlistItems = new ObservableCollection<PlaylistItemViewModel>();
@@ -108,7 +109,7 @@ namespace osu_song_player
 			selectedFolderPath = path;
 			selectedPathTextBlock.Text = path;
 
-			songFolderCrawler.SearchThreaded(path);
+			//songFolderCrawler.SearchThreaded(path);
 		}
 
 		private void SerializeConfig()
@@ -136,20 +137,24 @@ namespace osu_song_player
 
 		private void CtrlPlayBtn_Click(object sender, RoutedEventArgs e) 
 		{
-			SongViewModel selected = (SongViewModel)songListBox.SelectedItem;
+		
+			//get selected song source from the currently selected tab. "all song" and "search" tab
+			SongViewModel selected = songListTabControl.SelectedIndex == 1 ? 
+					(SongViewModel)searchListbox.SelectedItem : (SongViewModel)songListBox.SelectedItem;
 			if (selected == null)
 				return;
-
 			if (!musicPlayer.HasAudio || !currentSong.CheckEquals(selected))
-			{
-				currentSong = selected;
-				Console.WriteLine("playing: " + selectedFolderPath + "\\" + currentSong.Path);
-				musicPlayer.Open(currentSong, selectedFolderPath + "\\" + currentSong.Path, (MMDevice)audioOutputComboBox.SelectedItem);
-				Console.WriteLine((MMDevice)audioOutputComboBox.SelectedItem);
-			}
-		
-			musicPlayer.Play();
-			dispatcherTimer.Start();
+				{
+					currentSong = selected;
+					Console.WriteLine("playing: " + selectedFolderPath + "\\" + currentSong.Path);
+					musicPlayer.Open(currentSong, selectedFolderPath + "\\" + currentSong.Path, (MMDevice)audioOutputComboBox.SelectedItem);
+					Console.WriteLine((MMDevice)audioOutputComboBox.SelectedItem);
+				}
+
+				musicPlayer.Play();
+				dispatcherTimer.Start();
+
+
 		}
 		private void CtrlPauseBtn_Click(object sender, RoutedEventArgs e)
 		{
@@ -226,6 +231,56 @@ namespace osu_song_player
 		private void VolumeSlider_DragDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e)
 		{
 			//volumeValueLabel.Content = musicPlayer.Volume.ToString("F0");
+		}
+
+		private void SearchButton_Click(object sender, RoutedEventArgs e)
+		{
+			SongSearcher searcher = new SongSearcher();
+			searchListbox.ItemsSource = searcher.Search(searchTextBox.Text, new List<SongViewModel>(currentPlaylist.Songs), (bool)ignoreTxSizeCheckBox.IsChecked);
+			searchFoundCountLabel.Content = searchListbox.Items.Count;
+		}
+
+		private void CreatePlaylistButton_Click(object sender, RoutedEventArgs e)
+		{
+			if(newPlaylistTextbox.Text.Length == 0)
+			{
+				MessageBox.Show("Playlist must have a name");
+				return;
+			}
+
+			if (creator.inProgress && (bool)createConditionCheckBox.IsChecked )
+			{
+				MessageBox.Show("Cannot create playlist due to ongoing operation");
+				return;
+			}
+
+
+			if ((bool)createConditionCheckBox.IsChecked )
+			{
+				creator.events += AddToPlaylistItemListFromCreator;
+				creator.CreatePlaylist(newPlaylistTextbox.Text, selectedFolderPath);
+				Console.WriteLine("called");
+			}
+			else
+			{
+				PlaylistViewModel playlist = creator.CreatePlaylist(newPlaylistTextbox.Text);
+				playlistItems.Add(new PlaylistItemViewModel(playlist.Name, serializer.GetPlaylistPath(playlist)));
+			}
+			newPlaylistTextbox.Text = "";
+			createConditionCheckBox.IsChecked = false;
+		}
+
+		public void AddToPlaylistItemListFromCreator(object sender, EventArgs e)
+		{
+			if (creator.tempPlaylist == null)
+				return;
+			this.Dispatcher.Invoke(() =>
+			{
+				playlistItems.Add(new PlaylistItemViewModel(creator.tempPlaylist.Name, serializer.GetPlaylistPath(creator.tempPlaylist)));
+			});
+
+			Console.WriteLine("added to list");
+			creator.tempPlaylist = null;
 		}
 	}
 }

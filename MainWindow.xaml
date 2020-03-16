@@ -53,13 +53,13 @@
                         Minimum="0" Maximum="{Binding TimeInSeconds}" Value="{Binding Position, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></Slider>
                 <Label Name="lengthLabel" Grid.Row="1" Grid.Column="2" Content="{Binding SongInfo.Length, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
 
-                <StackPanel Grid.Column="3" Orientation="Horizontal">
-                    <Label Name="volumeLabel" Grid.Column="3" Width="60" HorizontalContentAlignment="Right" Padding="0 5 2 5" Content="Volume:"/>
-                    <Label Name="volumeValueLabel" Grid.Column="3" Width="40" HorizontalContentAlignment="Left" Padding="0 5" Content="{Binding VolumeRounded, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Bottom">
+                    <Label Name="volumeLabel" Grid.Column="3" Width="60" HorizontalContentAlignment="Right" Padding="0"  Content="Volume: "/>
+                    <Label Name="volumeValueLabel" Grid.Column="3" Width="40" HorizontalContentAlignment="Left" Padding="0" Content="{Binding VolumeRounded, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
 
                 </StackPanel>
 
-                <Slider Name="volumeSlider" Grid.Row="1" Grid.Column="3" Maximum="100" IsMoveToPointEnabled="True"
+                <Slider Name="volumeSlider" Grid.Row="1" Grid.Column="3" Maximum="100" IsMoveToPointEnabled="True" VerticalAlignment="Center"
                         Value="{Binding Volume, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Thumb.DragDelta="VolumeSlider_DragDelta"/>
             </Grid>
         </Grid>
@@ -81,25 +81,29 @@
                 <Label Content="Playlists" Width="55" HorizontalAlignment="Left"  VerticalContentAlignment="Bottom"/>
                 <Label Content="0" HorizontalAlignment="Right"  VerticalContentAlignment="Bottom"/>
             </DockPanel>
-            
-            
-            <ListBox Name="playlistListBox" Grid.Row="1" Margin="5 0" HorizontalContentAlignment="Stretch"
+
+            <TabControl Grid.Row="1" Margin="5 0">
+                <TabItem Header="Playlists">
+                    <ListBox Name="playlistListBox" HorizontalContentAlignment="Stretch"
                      SelectionChanged="PlaylistListBox_SelectionChanged">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Label Content="{Binding Name}"></Label>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-            
-            
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Label Content="{Binding Name}"></Label>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </TabItem>
+                <TabItem Header="Create">
+                    <StackPanel>
+                        <Label Content="Playlist name"/>
+                        <TextBox Name="newPlaylistTextbox" Height="25" Margin="5 0 5 0"></TextBox>
+                        <CheckBox Name="createConditionCheckBox" Content="Add all from osu! folder" Margin="5"/>
+                        <Button Name="createPlaylistButton" Content="Create Playlist" Height="25" Margin="5" Click="CreatePlaylistButton_Click"/>
+                    </StackPanel>
+                </TabItem>
+            </TabControl>
+
             <StackPanel Orientation="Horizontal" Grid.Row="2">
-                <Button Width="50" Margin="5">
-                    Delete
-                </Button>
-                <Button Width="50" Margin="5">
-                    Rename
-                </Button>
                 <Button Width="50" Margin="5" Click="Button_Click">
                     Save
                 </Button>
@@ -110,20 +114,77 @@
                 <Label Content="{Binding SongCount}" Width="100" HorizontalAlignment="Right" HorizontalContentAlignment="Right" VerticalContentAlignment="Bottom"/>
             </DockPanel>
 
-            <ListBox Name="songListBox" Grid.Column="1" Grid.Row="1" HorizontalContentAlignment="Stretch" ItemsSource="{Binding Songs}"
-                     SelectionMode="Single"
-                     SelectionChanged="SongListBox_SelectionChanged" Grid.ColumnSpan="3" SelectedIndex="0">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <DockPanel>
-                            <Label Content="{Binding Order, Mode=OneWay}"/>
-                            <Label DockPanel.Dock="Right" Grid.Column="2" Content="{Binding Artist, Mode=OneWay}"/>
-                            <Label Grid.Column="1" Content="{Binding Name, Mode=OneWay}"/>
-                        </DockPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+            <TabControl Name="songListTabControl" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="3" HorizontalAlignment="Stretch">
+                <TabItem Header="All Songs">
+                    <ListBox Name="songListBox" ItemsSource="{Binding Songs}"
+                             SelectionMode="Extended" HorizontalContentAlignment="Stretch"
+                             SelectionChanged="SongListBox_SelectionChanged"  SelectedIndex="0">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="50"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="{Binding Order, Mode=OneWay}"/>
+                                    <Label Grid.Column="1" Content="{Binding Name, Mode=OneWay}"/>
+                                    <Label Grid.Column="2" HorizontalContentAlignment="Right" Content="{Binding Artist, Mode=OneWay}"/>
+                                    <Grid.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Remove"/>
+                                            <MenuItem Header="Add to playlist"/>
+                                        </ContextMenu>
+                                    </Grid.ContextMenu>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </TabItem>
+                <TabItem Header="Search">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="175"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Margin="0 0 5 5">
+                            <TextBox Name="searchTextBox" Height="25"></TextBox>
+                            <Button Name="searchButton" Margin="0 5" Content="Search" Click="SearchButton_Click"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="Found:"/>
+                                <Label Name="searchFoundCountLabel" Content="0" Padding="0 5"/>
+                            </StackPanel>
+                            <CheckBox Name="ignoreTxSizeCheckBox" Content="Ignore TV size" Margin="5"/>
+                        </StackPanel>
+                        <ListBox Name="searchListbox" Grid.Column="1" HorizontalContentAlignment="Stretch">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="50"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Content="{Binding Order, Mode=OneWay}"/>
+                                        <Label Grid.Column="1" Content="{Binding Name, Mode=OneWay}"/>
+                                        <Label Grid.Column="2" HorizontalContentAlignment="Right" Content="{Binding Artist, Mode=OneWay}"/>
+                                        <Grid.ContextMenu>
+                                            <ContextMenu>
+                                                <MenuItem Header="Remove"/>
+                                                <MenuItem Header="Add to playlist"/>
+                                            </ContextMenu>
+                                        </Grid.ContextMenu>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
 
+                        </ListBox>
+                        
+                    </Grid>
+                </TabItem>
+            </TabControl>
+                    
+                    
             <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="3">
                 <Button Width="50" Margin="0 5 5 5">
                     Delete
