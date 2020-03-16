@@ -14,14 +14,18 @@ namespace osu_song_player
 		private UserConfig config;
 		public UserConfig Config { get => config; }
 		public bool IsConfigEmpty { get; private set; } = true;
-		public void SetOutputDeviceId(string device)
+		public void SetConfigValues(string outputDevice)
 		{
-			config.outputDeviceId = device;
+			config.outputDeviceId = outputDevice;
 		}
-		public void SerializeConfig(string path, string outputDevice)
+		public void SetConfigValues(string path, string outputDevice, float volume)
 		{
 			config.folderPath = path;
 			config.outputDeviceId = outputDevice;
+			config.volume = volume;
+		}
+		public void SerializeConfig()
+		{
 			if (!config.folderPath.Equals(string.Empty))
 				IsConfigEmpty = false;
 
@@ -63,5 +67,6 @@ namespace osu_song_player
 	{
 		public string folderPath;
 		public string outputDeviceId;
+		public float volume;
 	}
 }

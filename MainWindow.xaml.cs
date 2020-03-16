@@ -44,6 +44,7 @@ namespace osu_song_player
 			userConfigManager.DeserializeConfig();
 			if (!userConfigManager.IsConfigEmpty)
 			{
+				//setting osu folder path
 				if(playlistItems.Count == 0)
 					LoadSongsFromPath(userConfigManager.Config.folderPath);
 				else
@@ -59,15 +60,17 @@ namespace osu_song_player
 						if (userConfigManager.Config.outputDeviceId.Equals(devices[i].DeviceID))
 						{
 							audioOutputComboBox.SelectedIndex = i;
-							Console.WriteLine("audio device loaded from config");
+							Console.WriteLine("audio device loaded from config " + devices[i]);
 						}
 					}
 				}
+
+				musicPlayer.Volume = userConfigManager.Config.volume;
 			}
 
 			playlistInfoPanel.DataContext = currentPlaylist;
 			songListBox.DataContext = currentPlaylist;
-			songInfoGrid.DataContext = musicPlayer;
+			songInfoGrid.DataContext = musicPlayer;	//also sets the time slider and volume slider data context
 
 			dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
 			dispatcherTimer.Tick += dispatcherTimer_Tick;
@@ -80,7 +83,7 @@ namespace osu_song_player
 		private void ClosingCleanUp(object sender, EventArgs e)
 		{
 			musicPlayer.End();
-			//SerializeConfig();
+			SerializeConfig();
 		}
 
 		List<SongViewModel> temp = new List<SongViewModel>();
@@ -110,7 +113,8 @@ namespace osu_song_player
 
 		private void SerializeConfig()
 		{
-			userConfigManager.SerializeConfig(selectedFolderPath, ((MMDevice)audioOutputComboBox.SelectedItem).DeviceID);
+			userConfigManager.SetConfigValues(selectedFolderPath, ((MMDevice)audioOutputComboBox.SelectedItem).DeviceID, musicPlayer.Volume);
+			userConfigManager.SerializeConfig();
 		}
 
 		private void LoadDevices()
@@ -133,6 +137,9 @@ namespace osu_song_player
 		private void CtrlPlayBtn_Click(object sender, RoutedEventArgs e) 
 		{
 			SongViewModel selected = (SongViewModel)songListBox.SelectedItem;
+			if (selected == null)
+				return;
+
 			if (!musicPlayer.HasAudio || !currentSong.CheckEquals(selected))
 			{
 				currentSong = selected;
@@ -172,7 +179,7 @@ namespace osu_song_player
 			{
 				musicPlayer.Stop();
 				musicPlayer.SetDevice((MMDevice)audioOutputComboBox.SelectedItem);
-				userConfigManager.SetOutputDeviceId(((MMDevice)audioOutputComboBox.SelectedItem).DeviceID);
+				userConfigManager.SetConfigValues(((MMDevice)audioOutputComboBox.SelectedItem).DeviceID);
 			}
 		}
 
@@ -214,6 +221,11 @@ namespace osu_song_player
 			PlaylistViewModel playlist = serializer.DeserializePlaylist(item.Path);
 			if(playlist != null)
 				currentPlaylist.UpdateProperties(playlist);
+		}
+
+		private void VolumeSlider_DragDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e)
+		{
+			//volumeValueLabel.Content = musicPlayer.Volume.ToString("F0");
 		}
 	}
 }

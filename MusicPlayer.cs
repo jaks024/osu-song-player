@@ -13,6 +13,7 @@ namespace osu_song_player
 	{
 		private ISoundOut soundOut;
 		private IWaveSource waveSource;
+		private float volumeBuffer = 100;
 		private SongViewModel song;
 		public bool HasAudio { get; private set; }
 		public bool IsPlaying { get; private set; }
@@ -26,7 +27,6 @@ namespace osu_song_player
 			{
 				if (waveSource != null)
 				{
-					//NotifyPropertyChanged("TimeInSeconds");
 					return waveSource.GetLength().TotalSeconds;
 				}
 				return 0;
@@ -57,7 +57,27 @@ namespace osu_song_player
 				return "00:00";
 			}
 		}
-
+		public float Volume
+		{
+			get
+			{
+				if (soundOut != null && soundOut.WaveSource != null)
+					return Math.Min(soundOut.Volume * 100, 100f);
+				return volumeBuffer;
+			}
+			set
+			{
+				if (soundOut != null && soundOut.WaveSource != null)
+					soundOut.Volume = Math.Min(value / 100, 100f);
+				volumeBuffer = value;
+				NotifyPropertyChanged("VolumeRounded");
+				Console.WriteLine("Volume: " + volumeBuffer);
+			}
+		}
+		public double VolumeRounded
+		{
+			get { return Math.Round(volumeBuffer, 1); }
+		}
 		public void Update()
 		{
 			NotifyPropertyChanged("Position");
@@ -94,6 +114,8 @@ namespace osu_song_player
 			if (soundOut != null && HasAudio)
 			{
 				soundOut.Play();
+				Console.WriteLine("volume buffer " + volumeBuffer);
+				UpdateVolume();
 				IsPlaying = true;
 			}
 		}
@@ -120,6 +142,11 @@ namespace osu_song_player
 			IsPlaying = false;
 			Stop();
 			CleanUp();
+		}
+
+		public void UpdateVolume()
+		{
+			Volume = volumeBuffer;
 		}
 
 		private void CleanUp()
