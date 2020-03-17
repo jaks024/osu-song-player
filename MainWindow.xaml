@@ -79,16 +79,23 @@
 
             <DockPanel Margin="5 0">
                 <Label Content="Playlists" Width="55" HorizontalAlignment="Left"  VerticalContentAlignment="Bottom"/>
-                <Label Content="0" HorizontalAlignment="Right"  VerticalContentAlignment="Bottom"/>
+                <Label Name="playlistCountLabel" Content="{Binding PlaylistItems.Count}" HorizontalAlignment="Right"  VerticalContentAlignment="Bottom"/>
             </DockPanel>
 
             <TabControl Grid.Row="1" Margin="5 0">
                 <TabItem Header="Playlists">
                     <ListBox Name="playlistListBox" HorizontalContentAlignment="Stretch"
-                     SelectionChanged="PlaylistListBox_SelectionChanged">
+                     SelectionChanged="PlaylistListBox_SelectionChanged" ItemsSource="{Binding PlaylistItems}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Label Content="{Binding Name}"></Label>
+                                <Label Content="{Binding Name}">
+                                    <Label.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Rename"/>
+                                            <MenuItem Header="Remove"/>
+                                        </ContextMenu>
+                                    </Label.ContextMenu>
+                                </Label>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
@@ -104,9 +111,8 @@
             </TabControl>
 
             <StackPanel Orientation="Horizontal" Grid.Row="2">
-                <Button Width="50" Margin="5" Click="Button_Click">
-                    Save
-                </Button>
+                <Button Width="50" Margin="5" Content="Delete"/>
+                <Button Content="Rename" Margin="5"/>
             </StackPanel>
 
             <DockPanel Name="playlistInfoPanel" Grid.Column="1" Grid.ColumnSpan="3">
@@ -130,12 +136,6 @@
                                     <Label Content="{Binding Order, Mode=OneWay}"/>
                                     <Label Grid.Column="1" Content="{Binding Name, Mode=OneWay}"/>
                                     <Label Grid.Column="2" HorizontalContentAlignment="Right" Content="{Binding Artist, Mode=OneWay}"/>
-                                    <Grid.ContextMenu>
-                                        <ContextMenu>
-                                            <MenuItem Header="Remove"/>
-                                            <MenuItem Header="Add to playlist"/>
-                                        </ContextMenu>
-                                    </Grid.ContextMenu>
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
@@ -156,7 +156,7 @@
                             </StackPanel>
                             <CheckBox Name="ignoreTxSizeCheckBox" Content="Ignore TV size" Margin="5"/>
                         </StackPanel>
-                        <ListBox Name="searchListbox" Grid.Column="1" HorizontalContentAlignment="Stretch">
+                        <ListBox Name="searchListbox" Grid.Column="1" HorizontalContentAlignment="Stretch"  SelectionMode="Extended">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <Grid>
@@ -189,9 +189,16 @@
                 <Button Width="50" Margin="0 5 5 5">
                     Delete
                 </Button>
-                <Button Width="50" Margin="5 5">
-                    Refresh
+                <Button Name="addToPlaylistButton" Width="100" Margin="5 5" Click="AddToPlaylistButton_Click">
+                    Add to playlist
                 </Button>
+                <ComboBox Name="targetPlaylistComboBox" Width="150" Margin="5" ItemsSource="{Binding PlaylistItems}" SelectedIndex="0">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <Label Padding="0" Content="{Binding Name, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
             </StackPanel>
 
         </Grid>

@@ -28,40 +28,43 @@ namespace osu_song_player
 		private readonly SongFolderCrawler songFolderCrawler = new SongFolderCrawler();
 		private readonly PlaylistSerializer serializer = new PlaylistSerializer();
 		private readonly PlaylistCreator creator = new PlaylistCreator();
-		public string selectedFolderPath;
+
+
 		private readonly ObservableCollection<MMDevice> devices = new ObservableCollection<MMDevice>();
-		private ObservableCollection<PlaylistItemViewModel> playlistItems = new ObservableCollection<PlaylistItemViewModel>();
-		System.Windows.Threading.DispatcherTimer dispatcherTimer;
+		public ObservableCollection<PlaylistItemViewModel> PlaylistItems { get; } = new ObservableCollection<PlaylistItemViewModel>();
+
+		private System.Windows.Threading.DispatcherTimer dispatcherTimer;
+
+		public string selectedFolderPath;
 		private SongViewModel currentSong;
 		public PlaylistViewModel currentPlaylist = new PlaylistViewModel();
 		public MainWindow()
 		{
 			InitializeComponent();
-			LoadDevices(); //cscore
+			LoadDevices(); //cscore, audio output devices
 
-			playlistItems = new ObservableCollection<PlaylistItemViewModel>(serializer.GetAllPlaylists());
-			playlistListBox.ItemsSource = playlistItems;
+			PlaylistItems = new ObservableCollection<PlaylistItemViewModel>(serializer.GetAllPlaylists());
+			playlistListBox.DataContext = this;
+			playlistCountLabel.DataContext = this;
+			targetPlaylistComboBox.DataContext = this;
 
 			userConfigManager.DeserializeConfig();
 			if (!userConfigManager.IsConfigEmpty)
 			{
 				//setting osu folder path
-				if(playlistItems.Count == 0)
-					LoadSongsFromPath(userConfigManager.Config.folderPath);
-				else
-				{
-					selectedFolderPath = userConfigManager.Config.folderPath;
-					selectedPathTextBlock.Text = userConfigManager.Config.folderPath;
-				}
+				selectedFolderPath = userConfigManager.Config.folderPath;
+				selectedPathTextBlock.Text = userConfigManager.Config.folderPath;
 
 				if(userConfigManager.Config.outputDeviceId != null)
 				{
 					for(int i = 0; i < devices.Count; i++)
 					{
+						//check for same devices
 						if (userConfigManager.Config.outputDeviceId.Equals(devices[i].DeviceID))
 						{
 							audioOutputComboBox.SelectedIndex = i;
 							Console.WriteLine("audio device loaded from config " + devices[i]);
+							break;
 						}
 					}
 				}
@@ -210,19 +213,9 @@ namespace osu_song_player
 			Console.WriteLine("finish drag");
 		}
 
-		private void Button_Click(object sender, RoutedEventArgs e)
-		{
-			PlaylistSerializer serializer = new PlaylistSerializer();
-			PlaylistViewModel playlist = new PlaylistViewModel();
-			playlist.Songs = songFolderCrawler.Songs;
-			playlist.SongCount = songFolderCrawler.Songs.Count;
-			playlist.Name = "all_songs";
-			serializer.Serialize(playlist);
-		}
-
 		private void PlaylistListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			PlaylistItemViewModel item = playlistItems[playlistListBox.SelectedIndex];
+			PlaylistItemViewModel item = PlaylistItems[playlistListBox.SelectedIndex];
 			PlaylistViewModel playlist = serializer.DeserializePlaylist(item.Path);
 			if(playlist != null)
 				currentPlaylist.UpdateProperties(playlist);
@@ -260,11 +253,12 @@ namespace osu_song_player
 				creator.events += AddToPlaylistItemListFromCreator;
 				creator.CreatePlaylist(newPlaylistTextbox.Text, selectedFolderPath);
 				Console.WriteLine("called");
+				MessageBox.Show("All songs from the osu! folder are being fetched, and the playlist will be added when operation is complete. This might take a while.");
 			}
 			else
 			{
 				PlaylistViewModel playlist = creator.CreatePlaylist(newPlaylistTextbox.Text);
-				playlistItems.Add(new PlaylistItemViewModel(playlist.Name, serializer.GetPlaylistPath(playlist)));
+				PlaylistItems.Add(new PlaylistItemViewModel(playlist.Name, serializer.GetPlaylistPath(playlist)));
 			}
 			newPlaylistTextbox.Text = "";
 			createConditionCheckBox.IsChecked = false;
@@ -276,11 +270,48 @@ namespace osu_song_player
 				return;
 			this.Dispatcher.Invoke(() =>
 			{
-				playlistItems.Add(new PlaylistItemViewModel(creator.tempPlaylist.Name, serializer.GetPlaylistPath(creator.tempPlaylist)));
+				PlaylistItems.Add(new PlaylistItemViewModel(creator.tempPlaylist.Name, serializer.GetPlaylistPath(creator.tempPlaylist)));
 			});
 
 			Console.WriteLine("added to list");
+			MessageBox.Show(creator.tempPlaylist.Name + " has been added to playlist");
 			creator.tempPlaylist = null;
+		}
+
+		//moving songs from playlist to playlist
+		private void AddToPlaylistButton_Click(object sender, RoutedEventArgs e)
+		{
+			List<SongViewModel> selectedSongs;
+			switch (songListTabControl.SelectedIndex)
+			{
+				case 1:     //tab 1, search tab
+					selectedSongs = searchListbox.SelectedItems.Cast<SongViewModel>().ToList();
+					break;
+				default:	//tab 0, song list
+					selectedSongs = songListBox.SelectedItems.Cast<SongViewModel>().ToList();
+					break;
+			}
+
+			if (selectedSongs.Count <= 0)
+			{
+				MessageBox.Show("No songs are selected");
+				return;
+			}
+
+			if (((PlaylistItemViewModel)targetPlaylistComboBox.SelectedItem).Name.Equals(currentPlaylist.Name))
+			{
+				MessageBox.Show("Cannot add to the same playlist");
+				return;
+			}
+
+			PlaylistItemViewModel item = PlaylistItems[targetPlaylistComboBox.SelectedIndex];
+			PlaylistViewModel targetPlaylist = serializer.DeserializePlaylist(item.Path);
+			selectedSongs.ForEach(targetPlaylist.Songs.Add);
+			serializer.Serialize(targetPlaylist);
+
+			MessageBox.Show(string.Format("Added {0} songs to {1} from {2}", selectedSongs.Count, currentPlaylist.Name, targetPlaylist.Name));
+
+			Console.WriteLine("moved " + selectedSongs.Count + " to " + targetPlaylist.Name);
 		}
 	}
 }
