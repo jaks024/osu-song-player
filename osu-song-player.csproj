@@ -66,6 +66,7 @@
     <Compile Include="PlaylistItemViewModel.cs" />
     <Compile Include="PlaylistSerializer.cs" />
     <Compile Include="PlaylistViewModel.cs" />
+    <Compile Include="ShuffleController.cs" />
     <Compile Include="SongFolderCrawler.cs" />
     <Compile Include="MusicPlayer.cs" />
     <Compile Include="SongSearcher.cs" />

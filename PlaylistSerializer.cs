@@ -67,6 +67,10 @@ namespace osu_song_player
 				Console.WriteLine("playlist deserialized: " + path);
 				PlaylistViewModel playlist = JsonConvert.DeserializeObject<PlaylistViewModel>(content);
 				playlist.Name = GetFileNameNoExtension(path);
+				for(int i = 0; i < playlist.Songs.Count; i++)
+				{
+					playlist.Songs[i].PlaylistName = playlist.Name;
+				}
 				return playlist;
 			}
 		}

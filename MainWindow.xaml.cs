@@ -28,7 +28,7 @@ namespace osu_song_player
 		private readonly SongFolderCrawler songFolderCrawler = new SongFolderCrawler();
 		private readonly PlaylistSerializer serializer = new PlaylistSerializer();
 		private readonly PlaylistCreator creator = new PlaylistCreator();
-
+		private readonly ShuffleController shuffleController = new ShuffleController();
 
 		private readonly ObservableCollection<MMDevice> devices = new ObservableCollection<MMDevice>();
 		public ObservableCollection<PlaylistItemViewModel> PlaylistItems { get; } = new ObservableCollection<PlaylistItemViewModel>();
@@ -198,32 +198,32 @@ namespace osu_song_player
 				}
 
 
-
-				//so it doesnt exceed the list 
-				if (nextIndex < maximum)
+				musicPlayer.ResetCurrentTime();
+				musicPlayer.Update();
+				if ((bool)ctrlRepeatCheckBox.IsChecked)
 				{
-					if ((bool)ctrlShuffleCheckBox.IsChecked)
-					{
-						Random rand = new Random();
-						int num = rand.Next(0, maximum);
-						while(num == listbox.SelectedIndex && maximum > 1)
-						{
-							num = rand.Next(0, maximum);
-						}
-						listbox.SelectedIndex = num;
-					}
-					else
-					{
-						listbox.SelectedIndex++;
-					}
+					PlaySong();
+					return;
+				}
 
+				if ((bool)ctrlShuffleCheckBox.IsChecked && maximum > 1)
+				{
+					//random value that doesnt repeat
+					listbox.SelectedIndex = shuffleController.GetNextValue(maximum, listbox.SelectedIndex);
 					PlaySong();
 				}
-				else	//reset song to beginning 
+				else
 				{
-					musicPlayer.ResetCurrentTime();
-					musicPlayer.Update();
-					dispatcherTimer.Stop();
+					//so it doesnt exceed the list 
+					if (nextIndex < maximum)
+					{
+						listbox.SelectedIndex++;
+						PlaySong();
+					}
+					else    //reset song to beginning 
+					{
+						dispatcherTimer.Stop();
+					}
 				}
 			}
 		}
@@ -268,7 +268,7 @@ namespace osu_song_player
 		private void PlaylistListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
 			ReserializeCurrentPlaylist();   //checks for changes, and reserialize it
-
+			shuffleController.ClearPastValues();
 			int index = playlistListBox.SelectedIndex;
 			if (index >= 0 && index < PlaylistItems.Count)
 			{
@@ -377,7 +377,19 @@ namespace osu_song_player
 
 			PlaylistItemViewModel item = PlaylistItems[targetPlaylistComboBox.SelectedIndex];
 			PlaylistViewModel targetPlaylist = serializer.DeserializePlaylist(item.Path);
-			selectedSongs.ForEach(targetPlaylist.Songs.Add);
+			int largestInd = 0;
+			for(int i = 0; i < targetPlaylist.Songs.Count; i++)
+			{
+				if (targetPlaylist.Songs[i].Order > largestInd)
+					largestInd = targetPlaylist.Songs[i].Order;
+			}
+			for(int i = 0; i < selectedSongs.Count; i++)
+			{
+				SongViewModel song = new SongViewModel(selectedSongs[i]);
+				song.Order = largestInd + i + 1;
+				targetPlaylist.Songs.Add(song);
+			}
+
 			serializer.Serialize(targetPlaylist);
 
 			MessageBox.Show(string.Format("Added {0} songs to {1} from {2}", selectedSongs.Count, currentPlaylist.Name, targetPlaylist.Name));
@@ -406,6 +418,15 @@ namespace osu_song_player
 				Console.WriteLine("Removed " + selectedSongs[i].ToString());
 				currentPlaylist.Songs.Remove(selectedSongs[i]);
 			}
+
+			songListBox.SelectedIndex = 0;
+			for(int i = 0; i < currentPlaylist.Songs.Count; i++)
+			{
+				if (currentPlaylist.Songs[i].CheckEquals(currentSong))
+					songListBox.SelectedIndex = i;
+			}
+
+
 			MessageBox.Show("Deleted " + selectedSongs.Count + " songs from "+ currentPlaylist.Name);
 		}
 
