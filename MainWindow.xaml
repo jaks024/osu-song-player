@@ -109,6 +109,10 @@
                         <TextBox Name="newPlaylistTextbox" Height="25" Margin="5" ></TextBox>
                         <CheckBox Name="createConditionCheckBox" Content="Add all from osu! folder" Margin="5"/>
                         <Button Name="createPlaylistButton" Content="Create Playlist" Height="25" Margin="5" Click="CreatePlaylistButton_Click"/>
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Creation progress:"/>
+                            <Label Name="createProgessLabel" Content="{Binding Progress, Mode=OneWay}"/>
+                        </StackPanel>
                     </StackPanel>
                 </TabItem>
                 <TabItem Header="Rename">
@@ -129,7 +133,7 @@
                 <Label Content="{Binding SongCount}" Width="100" HorizontalAlignment="Right" HorizontalContentAlignment="Right" VerticalContentAlignment="Bottom"/>
             </DockPanel>
 
-            <TabControl Name="songListTabControl" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="3" HorizontalAlignment="Stretch">
+            <TabControl Name="songListTabControl" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" SelectionChanged="SongListTabControl_SelectionChanged">
                 <TabItem Header="All Songs">
                     <ListBox Name="songListBox" ItemsSource="{Binding Songs}"
                              SelectionMode="Extended" HorizontalContentAlignment="Stretch" SelectedIndex="0">
@@ -213,9 +217,8 @@
 
 
         <StackPanel Name="footerStackPanel" Grid.Row="2" Orientation="Horizontal">
-            <Button Name="selectPathBtn" Width="50" Margin="5" Click="SelectPathBtn_Click">Select</Button>
+            <Button Name="selectPathBtn" Width="100" Margin="5" Click="SelectPathBtn_Click">Select osu! folder</Button>
             <TextBlock Name="selectedPathTextBlock" Grid.Column="1" Margin="5" VerticalAlignment="Center">
-                osu! song folder: C:\Users\Documents\GitHub\osu-song-player
             </TextBlock>
             <ComboBox Name="audioOutputComboBox" Margin="5" SelectionChanged="AudioOutputComboBox_SelectionChanged"/>
         </StackPanel>

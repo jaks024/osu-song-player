@@ -26,6 +26,7 @@ namespace osu_song_player
 		public List<PlaylistItemViewModel> GetAllPlaylists()
 		{
 			string path = Path.Combine(Directory.GetCurrentDirectory(), directoryName);
+			Directory.CreateDirectory(path);
 			IEnumerable<string> meta = Directory.EnumerateFiles(path, "*.json", SearchOption.TopDirectoryOnly);
 			List<PlaylistItemViewModel> items = new List<PlaylistItemViewModel>();
 			foreach (string p in meta)

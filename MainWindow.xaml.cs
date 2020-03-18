@@ -27,7 +27,7 @@ namespace osu_song_player
 		private readonly UserConfigManager userConfigManager = new UserConfigManager();
 		private readonly SongFolderCrawler songFolderCrawler = new SongFolderCrawler();
 		private readonly PlaylistSerializer serializer = new PlaylistSerializer();
-		private readonly PlaylistCreator creator = new PlaylistCreator();
+		private readonly PlaylistCreator playlistCreator = new PlaylistCreator();
 		private readonly ShuffleController shuffleController = new ShuffleController();
 
 		private readonly ObservableCollection<MMDevice> devices = new ObservableCollection<MMDevice>();
@@ -74,10 +74,11 @@ namespace osu_song_player
 
 			playlistInfoPanel.DataContext = currentPlaylist;
 			songListBox.DataContext = currentPlaylist;
-			songInfoGrid.DataContext = musicPlayer;	//also sets the time slider and volume slider data context
+			songInfoGrid.DataContext = musicPlayer; //also sets the time slider and volume slider data context
+			createProgessLabel.DataContext = playlistCreator;
 
 			dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
-			dispatcherTimer.Tick += dispatcherTimer_Tick;
+			dispatcherTimer.Tick += dispatcherTimerTick;
 			dispatcherTimer.Interval = new TimeSpan(0, 0, 1);
 
 			this.Closed += new EventHandler(ClosingCleanUp);
@@ -177,8 +178,11 @@ namespace osu_song_player
 		//	dispatcherTimer.Stop();
 		//}
 
-		private void dispatcherTimer_Tick(object sender, EventArgs e)
+		private void dispatcherTimerTick(object sender, EventArgs e)
 		{
+			if (!musicPlayer.HasAudio)
+				return;
+
 			musicPlayer.Update();
 			if (!musicPlayer.IsPlaying && !musicPlayer.manualStop)
 			{
@@ -202,7 +206,10 @@ namespace osu_song_player
 				musicPlayer.Update();
 				if ((bool)ctrlRepeatCheckBox.IsChecked)
 				{
-					PlaySong();
+					if (listbox.SelectedItem != null)
+						PlaySong();
+					else
+						dispatcherTimer.Stop();
 					return;
 				}
 
@@ -211,6 +218,7 @@ namespace osu_song_player
 					//random value that doesnt repeat
 					listbox.SelectedIndex = shuffleController.GetNextValue(maximum, listbox.SelectedIndex);
 					PlaySong();
+					listbox.ScrollIntoView(listbox.SelectedItem);
 				}
 				else
 				{
@@ -268,7 +276,8 @@ namespace osu_song_player
 		private void PlaylistListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
 			ReserializeCurrentPlaylist();   //checks for changes, and reserialize it
-			shuffleController.ClearPastValues();
+			if((bool)ctrlShuffleCheckBox.IsChecked)
+				shuffleController.ClearPastValues();
 			int index = playlistListBox.SelectedIndex;
 			if (index >= 0 && index < PlaylistItems.Count)
 			{
@@ -303,7 +312,7 @@ namespace osu_song_player
 				return;
 			}
 
-			if (creator.inProgress && (bool)createConditionCheckBox.IsChecked )
+			if (playlistCreator.inProgress && (bool)createConditionCheckBox.IsChecked )
 			{
 				MessageBox.Show("Cannot create playlist due to ongoing operation");
 				return;
@@ -321,14 +330,14 @@ namespace osu_song_player
 
 			if ((bool)createConditionCheckBox.IsChecked )
 			{
-				creator.events += AddToPlaylistItemListFromCreator;
-				creator.CreatePlaylist(newPlaylistTextbox.Text, selectedFolderPath);
+				playlistCreator.events += AddToPlaylistItemListFromCreator;
+				playlistCreator.CreatePlaylist(newPlaylistTextbox.Text, selectedFolderPath);
 				Console.WriteLine("called");
 				MessageBox.Show("All songs from the osu! folder are being fetched, and the playlist will be added when operation is complete. This might take a while.");
 			}
 			else
 			{
-				PlaylistViewModel playlist = creator.CreatePlaylist(newPlaylistTextbox.Text);
+				PlaylistViewModel playlist = playlistCreator.CreatePlaylist(newPlaylistTextbox.Text);
 				PlaylistItems.Add(new PlaylistItemViewModel(playlist.Name, serializer.GetPlaylistPath(playlist)));
 			}
 			newPlaylistTextbox.Text = "";
@@ -337,16 +346,16 @@ namespace osu_song_player
 
 		public void AddToPlaylistItemListFromCreator(object sender, EventArgs e)
 		{
-			if (creator.tempPlaylist == null)
+			if (playlistCreator.tempPlaylist == null)
 				return;
 			this.Dispatcher.Invoke(() =>
 			{
-				PlaylistItems.Add(new PlaylistItemViewModel(creator.tempPlaylist.Name, serializer.GetPlaylistPath(creator.tempPlaylist)));
+				PlaylistItems.Add(new PlaylistItemViewModel(playlistCreator.tempPlaylist.Name, serializer.GetPlaylistPath(playlistCreator.tempPlaylist)));
 			});
 
 			Console.WriteLine("added to list");
-			MessageBox.Show(creator.tempPlaylist.Name + " has been added to playlist");
-			creator.tempPlaylist = null;
+			MessageBox.Show(playlistCreator.tempPlaylist.Name + " has been added to playlist");
+			playlistCreator.tempPlaylist = null;
 		}
 
 		//moving songs from playlist to playlist
@@ -479,6 +488,11 @@ namespace osu_song_player
 
 		private void ConfirmRenameButton_Click(object sender, RoutedEventArgs e)
 		{
+			if(PlaylistItems.Count <= 0)
+			{
+				MessageBox.Show("No playlist to rename");
+				return;
+			}
 			if(renameTextBox.Text.Length <= 0)
 			{
 				MessageBox.Show("Name cannot be empty");
@@ -502,14 +516,64 @@ namespace osu_song_player
 
 		private void CtrlPreviousBtn_Click(object sender, RoutedEventArgs e)
 		{
-
+			SkipSong(false);
 		}
 
 		private void CtrlNextBtn_Click(object sender, RoutedEventArgs e)
 		{
-
+			SkipSong(true);
 		}
 
+		private void SkipSong(bool forward)
+		{
+			if (!musicPlayer.IsPlaying)
+				return;
+			ListBox listbox;
+			int maximum;
+			if(songListTabControl.SelectedIndex == 1)
+			{
+				listbox = searchListbox;
+				maximum = searchListbox.Items.Count;
+			}
+			else
+			{
+				listbox = songListBox;
+				maximum = currentPlaylist.Songs.Count;
+			}
 
+			if ((bool)ctrlShuffleCheckBox.IsChecked && maximum > 1)
+			{
+				listbox.SelectedIndex = shuffleController.GetNextValue(maximum, listbox.SelectedIndex);
+				PlaySong();
+				listbox.ScrollIntoView(listbox.SelectedItem);
+				return;
+			}
+
+			if (forward)
+			{
+				if (listbox.SelectedIndex + 1 < maximum)
+				{
+					listbox.SelectedIndex++;
+					PlaySong();
+				}
+			}
+			else
+			{
+				if (listbox.SelectedIndex - 1 >= 0)
+				{
+					listbox.SelectedIndex--;
+					PlaySong();
+				}
+			}
+		}
+
+		private void SongListTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			if (e.Source is TabControl)
+			{
+				Console.WriteLine("cleared at tab control");
+				shuffleController.ClearPastValues();
+			}
+		}
 	}
 }

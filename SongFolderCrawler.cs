@@ -14,6 +14,7 @@ namespace osu_song_player
 	{
 		public ObservableCollection<SongViewModel> Songs { get; private set; }
 		public bool searchCompleted;
+		public float percentCompletion;
 		private void Search(string path)
 		{
 			ObservableCollection<SongViewModel> songs = new ObservableCollection<SongViewModel>();
@@ -51,6 +52,7 @@ namespace osu_song_player
 					songs.Add(song);
 					songCount++;
 				}
+				percentCompletion = (float)songCount / directories.Length * 100f;
 			}
 			Songs = songs;
 			searchCompleted = true;

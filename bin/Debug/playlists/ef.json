@@ -1,6 +1,24 @@
 {
   "Songs": [
     {
+      "Order": 0,
+      "Name": "FLARE (TV Size)",
+      "Artist": "Void_Chords feat. LIO",
+      "Path": "1000078 Void_Chords feat LIO - FLARE (TV Size)\\audio.mp3"
+    },
+    {
+      "Order": 1,
+      "Name": "Kawaii",
+      "Artist": "Thaehan",
+      "Path": "1000338 Thaehan - Kawaii\\audio.mp3"
+    },
+    {
+      "Order": 2,
+      "Name": "Fly Away",
+      "Artist": "nu11",
+      "Path": "1000488 nu11 - Fly Away\\audio.mp3"
+    },
+    {
       "Order": 3,
       "Name": "Yotsuya-san ni Yoroshiku",
       "Artist": "Himeringo",

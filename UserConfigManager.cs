@@ -26,6 +26,8 @@ namespace osu_song_player
 		}
 		public void SerializeConfig()
 		{
+			if (!Directory.Exists(config.folderPath))
+				config.folderPath = string.Empty;
 			if (!config.folderPath.Equals(string.Empty))
 				IsConfigEmpty = false;
 

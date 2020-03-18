@@ -6,13 +6,15 @@ using System.Threading.Tasks;
 using System.Threading;
 namespace osu_song_player
 {
-	public class PlaylistCreator
+	public class PlaylistCreator : ViewModelBase
 	{
 		private SongFolderCrawler crawler;
 		private string tempName;
 		public PlaylistViewModel tempPlaylist;
 		public event EventHandler events;
 		public bool inProgress;
+		public float progress;
+		public string Progress { get => progress.ToString("F2") + "%"; }
 		public PlaylistViewModel CreatePlaylist(string name)
 		{
 			PlaylistSerializer serializer = new PlaylistSerializer();
@@ -41,8 +43,10 @@ namespace osu_song_player
 		{
 			while (true)
 			{
-				Thread.Sleep(1000);
+				Thread.Sleep(500);
 				Console.WriteLine("checked compeltion");
+				progress = crawler.percentCompletion;
+				NotifyPropertyChanged("Progress");
 				if (crawler.searchCompleted)
 				{
 					Console.WriteLine("search completed, " + tempName);
