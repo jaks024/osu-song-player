@@ -30,13 +30,17 @@ namespace osu_song_player
 			List<PlaylistItemViewModel> items = new List<PlaylistItemViewModel>();
 			foreach (string p in meta)
 			{
-				int index = p.LastIndexOf("\\") + 1;
-				string name = p.Substring(index, p.LastIndexOf(".") - index); //remove extensions
+				string name = GetFileNameNoExtension(p);
 				Console.WriteLine(name);
 				items.Add(new PlaylistItemViewModel(name, p));
 			}
 
 			return items;
+		}
+		private string GetFileNameNoExtension(string p)
+		{
+			int index = p.LastIndexOf("\\") + 1;
+			return p.Substring(index, p.LastIndexOf(".") - index); //remove extensions
 		}
 
 		public string GetPlaylistPath(PlaylistViewModel playlist)
@@ -61,9 +65,39 @@ namespace osu_song_player
 					return null;
 				}
 				Console.WriteLine("playlist deserialized: " + path);
-				return JsonConvert.DeserializeObject<PlaylistViewModel>(content);
+				PlaylistViewModel playlist = JsonConvert.DeserializeObject<PlaylistViewModel>(content);
+				playlist.Name = GetFileNameNoExtension(path);
+				return playlist;
 			}
 		}
 
+		public void DeletePlaylistFile(string path)
+		{
+			if (!File.Exists(path))
+			{
+				Console.WriteLine("Playlist doesnt exist");
+				System.Windows.MessageBox.Show("Cannot delete a playlist that does not exist");
+				return;
+			}
+
+			File.Delete(path);
+			System.Windows.MessageBox.Show("Deleted playlist at " + path);
+			Console.WriteLine("deleted " + path);
+		}
+
+		public string RenamePlaylist(string path, string newName)
+		{
+			if (!File.Exists(path))
+			{
+				Console.WriteLine("Playlist doesnt exist");
+				System.Windows.MessageBox.Show("Cannot rename a playlist that does not exist");
+				return "";
+			}
+			int index = path.LastIndexOf("\\") + 1;
+			string changed = Path.Combine(path.Substring(0, index), newName + jsonExtension);
+			File.Move(path, changed);
+			Console.WriteLine("Renamed to: " + changed);
+			return changed;
+		}
 	}
 }

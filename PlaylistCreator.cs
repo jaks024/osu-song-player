@@ -31,6 +31,7 @@ namespace osu_song_player
 			crawler.SearchThreaded(path);
 
 			Thread checkThread = new Thread(CheckComplete);
+			checkThread.IsBackground = true;
 			checkThread.Start();
 			tempName = name;
 			inProgress = true;

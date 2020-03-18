@@ -17,9 +17,10 @@ namespace osu_song_player
 		private SongViewModel song;
 		public bool HasAudio { get; private set; }
 		public bool IsPlaying { get; private set; }
+		public bool manualStop { get; private set; }
 		public SongViewModel SongInfo
 		{
-			get => song;
+			get => song == null ? new SongViewModel(0, "", "", "") : song;
 		}
 		public double TimeInSeconds
 		{
@@ -82,6 +83,9 @@ namespace osu_song_player
 		{
 			NotifyPropertyChanged("Position");
 			NotifyPropertyChanged("PositionInTime");
+			Console.WriteLine("state " + soundOut.PlaybackState);
+			if (soundOut.PlaybackState == PlaybackState.Stopped)
+				IsPlaying = false;
 		}
 
 		public void Open(SongViewModel songViewModel, string name, MMDevice device)
@@ -117,6 +121,7 @@ namespace osu_song_player
 				Console.WriteLine("volume buffer " + volumeBuffer);
 				UpdateVolume();
 				IsPlaying = true;
+				manualStop = false;
 			}
 		}
 		public void Pause()
@@ -125,6 +130,7 @@ namespace osu_song_player
 			{
 				soundOut.Pause();
 				IsPlaying = false;
+				manualStop = true;
 			}
 		}
 		public void Stop()
@@ -133,11 +139,18 @@ namespace osu_song_player
 			{
 				soundOut.Stop();
 				IsPlaying = false;
+				manualStop = true;
 			}
 		}
+		public void ResetCurrentTime()
+		{
+			Position = 0;
+		}
 
+		//cleans up everything
 		public void End()
 		{
+			manualStop = false;
 			HasAudio = false;
 			IsPlaying = false;
 			Stop();

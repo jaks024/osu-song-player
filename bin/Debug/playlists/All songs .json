@@ -1,18 +1,6 @@
 {
   "Songs": [
     {
-      "Order": 0,
-      "Name": "FLARE (TV Size)",
-      "Artist": "Void_Chords feat. LIO",
-      "Path": "1000078 Void_Chords feat LIO - FLARE (TV Size)\\audio.mp3"
-    },
-    {
-      "Order": 1,
-      "Name": "Kawaii",
-      "Artist": "Thaehan",
-      "Path": "1000338 Thaehan - Kawaii\\audio.mp3"
-    },
-    {
       "Order": 2,
       "Name": "Fly Away",
       "Artist": "nu11",
@@ -19764,7 +19752,5 @@
       "Artist": "*Namirin",
       "Path": "namirin - Yasashisa no Riyuu\\namirin.mp3"
     }
-  ],
-  "Name": "h",
-  "SongCount": 3294
+  ]
 }

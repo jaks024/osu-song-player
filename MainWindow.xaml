@@ -19,19 +19,28 @@
 
         <Grid Name="ctrlGrid">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="50"/>
-                <ColumnDefinition Width="50"/>
-                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="45"/>
+                <ColumnDefinition Width="45"/>
+                <ColumnDefinition Width="45"/>
+                <ColumnDefinition Width="60"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            <Button Name="ctrlPlayBtn" Margin="5" Click="CtrlPlayBtn_Click">Play</Button>
-            <Button Name="ctrlPauseBtn" Grid.Column="1" Margin="5" Click="CtrlPauseBtn_Click">Pause</Button>
-            <Button Name="ctrlStopBtn" Grid.Column="2" Margin="5" Click="CtrlStopBtn_Click">Stop</Button>
+            <Button Name="ctrlPlayBtn" Margin="2.5 5" Click="CtrlPlayBtn_Click">Play</Button>
+            <Button Name="ctrlPauseBtn" Grid.Column="1" Margin="2.5 5" Click="CtrlPauseBtn_Click">Pause</Button>
+            <StackPanel Grid.Column="2" Margin="2.5 5">
+                <Button Name="ctrlPreviousBtn" Click="CtrlPreviousBtn_Click">Prev</Button>
+                <Button Name="ctrlNextBtn" Click="CtrlNextBtn_Click">Next</Button>
+            </StackPanel>
+            <StackPanel Grid.Column="3" Margin="0 5">
+                <CheckBox Name="ctrlShuffleCheckBox" Margin="0 2.5">Shuffle</CheckBox>
+                <CheckBox Name="ctrlRepeatCheckBox" Margin="0 2.5">Repeat</CheckBox>
+            </StackPanel>
 
-            <Grid Name="songInfoGrid" Grid.Column="3" VerticalAlignment="Center">
+
+            <Grid Name="songInfoGrid" Grid.Column="4" VerticalAlignment="Center">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="25"/>
                     <RowDefinition Height="25"/>
@@ -49,7 +58,7 @@
                 <Label Grid.Row="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right" Content="{Binding PositionInTime, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
                 <Slider Name="timeSlider" Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" 
                         Thumb.DragStarted="TimeSlider_DragStarted" Thumb.DragDelta="TimeSlider_DragDelta" Thumb.DragCompleted="TimeSlider_DragCompleted"
-                        IsMoveToPointEnabled="True"
+                        IsMoveToPointEnabled="True" MouseUp="TimeSlider_MouseUp"
                         Minimum="0" Maximum="{Binding TimeInSeconds}" Value="{Binding Position, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></Slider>
                 <Label Name="lengthLabel" Grid.Row="1" Grid.Column="2" Content="{Binding SongInfo.Length, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
 
@@ -82,19 +91,13 @@
                 <Label Name="playlistCountLabel" Content="{Binding PlaylistItems.Count}" HorizontalAlignment="Right"  VerticalContentAlignment="Bottom"/>
             </DockPanel>
 
-            <TabControl Grid.Row="1" Margin="5 0">
+            <TabControl Name="mainTabControl" Grid.Row="1" Margin="5 0" SelectionChanged="MainTabControl_SelectionChanged" SelectedIndex="0">
                 <TabItem Header="Playlists">
-                    <ListBox Name="playlistListBox" HorizontalContentAlignment="Stretch"
+                    <ListBox Name="playlistListBox" HorizontalContentAlignment="Stretch" SelectedIndex="0"
                      SelectionChanged="PlaylistListBox_SelectionChanged" ItemsSource="{Binding PlaylistItems}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Label Content="{Binding Name}">
-                                    <Label.ContextMenu>
-                                        <ContextMenu>
-                                            <MenuItem Header="Rename"/>
-                                            <MenuItem Header="Remove"/>
-                                        </ContextMenu>
-                                    </Label.ContextMenu>
                                 </Label>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
@@ -103,16 +106,22 @@
                 <TabItem Header="Create">
                     <StackPanel>
                         <Label Content="Playlist name"/>
-                        <TextBox Name="newPlaylistTextbox" Height="25" Margin="5 0 5 0"></TextBox>
+                        <TextBox Name="newPlaylistTextbox" Height="25" Margin="5" ></TextBox>
                         <CheckBox Name="createConditionCheckBox" Content="Add all from osu! folder" Margin="5"/>
                         <Button Name="createPlaylistButton" Content="Create Playlist" Height="25" Margin="5" Click="CreatePlaylistButton_Click"/>
+                    </StackPanel>
+                </TabItem>
+                <TabItem Header="Rename">
+                    <StackPanel>
+                        <Label Content="Rename the playlist"/>
+                        <TextBox Name="renameTextBox" Margin="5" Height="25"/>
+                        <Button Name="confirmRenameButton" Margin="5" Height="25" Content="Rename Playlist" Click="ConfirmRenameButton_Click"/>
                     </StackPanel>
                 </TabItem>
             </TabControl>
 
             <StackPanel Orientation="Horizontal" Grid.Row="2">
-                <Button Width="50" Margin="5" Content="Delete"/>
-                <Button Content="Rename" Margin="5"/>
+                <Button Name="deletePlaylistButton" Width="100" Margin="5" Content="Delete playlist" Click="DeletePlaylistButton_Click"/>
             </StackPanel>
 
             <DockPanel Name="playlistInfoPanel" Grid.Column="1" Grid.ColumnSpan="3">
@@ -123,8 +132,7 @@
             <TabControl Name="songListTabControl" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="3" HorizontalAlignment="Stretch">
                 <TabItem Header="All Songs">
                     <ListBox Name="songListBox" ItemsSource="{Binding Songs}"
-                             SelectionMode="Extended" HorizontalContentAlignment="Stretch"
-                             SelectionChanged="SongListBox_SelectionChanged"  SelectedIndex="0">
+                             SelectionMode="Extended" HorizontalContentAlignment="Stretch" SelectedIndex="0">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid>
@@ -186,8 +194,8 @@
                     
                     
             <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="3">
-                <Button Width="50" Margin="0 5 5 5">
-                    Delete
+                <Button Name="deleteSongButton" Width="100" Margin="0 5 5 5" Click="DeleteSongButton_Click">
+                    Delete song(s)
                 </Button>
                 <Button Name="addToPlaylistButton" Width="100" Margin="5 5" Click="AddToPlaylistButton_Click">
                     Add to playlist

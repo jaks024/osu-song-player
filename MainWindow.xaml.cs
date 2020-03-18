@@ -87,7 +87,9 @@ namespace osu_song_player
 		private void ClosingCleanUp(object sender, EventArgs e)
 		{
 			musicPlayer.End();
+			ReserializeCurrentPlaylist();   //checks for changes, and reserialize it
 			SerializeConfig();
+			//Environment.Exit(Environment.ExitCode);
 		}
 
 		List<SongViewModel> temp = new List<SongViewModel>();
@@ -138,47 +140,92 @@ namespace osu_song_player
 			audioOutputComboBox.SelectedIndex = 0;
 		}
 
-		private void CtrlPlayBtn_Click(object sender, RoutedEventArgs e) 
+		private void CtrlPlayBtn_Click(object sender, RoutedEventArgs e)
 		{
-		
+			PlaySong();
+			musicPlayer.Update();
+			dispatcherTimer.Start();
+		}
+		private void PlaySong()
+		{
 			//get selected song source from the currently selected tab. "all song" and "search" tab
-			SongViewModel selected = songListTabControl.SelectedIndex == 1 ? 
+			SongViewModel selected = songListTabControl.SelectedIndex == 1 ?
 					(SongViewModel)searchListbox.SelectedItem : (SongViewModel)songListBox.SelectedItem;
 			if (selected == null)
 				return;
 			if (!musicPlayer.HasAudio || !currentSong.CheckEquals(selected))
-				{
-					currentSong = selected;
-					Console.WriteLine("playing: " + selectedFolderPath + "\\" + currentSong.Path);
-					musicPlayer.Open(currentSong, selectedFolderPath + "\\" + currentSong.Path, (MMDevice)audioOutputComboBox.SelectedItem);
-					Console.WriteLine((MMDevice)audioOutputComboBox.SelectedItem);
-				}
+			{
+				currentSong = selected;
+				Console.WriteLine("playing: " + selectedFolderPath + "\\" + currentSong.Path);
+				musicPlayer.Open(currentSong, selectedFolderPath + "\\" + currentSong.Path, (MMDevice)audioOutputComboBox.SelectedItem);
+				Console.WriteLine((MMDevice)audioOutputComboBox.SelectedItem);
+			}
 
-				musicPlayer.Play();
-				dispatcherTimer.Start();
-
-
+			musicPlayer.Play();
 		}
+
 		private void CtrlPauseBtn_Click(object sender, RoutedEventArgs e)
 		{
 			musicPlayer.Pause();
 			dispatcherTimer.Stop();
 		}
-		private void CtrlStopBtn_Click(object sender, RoutedEventArgs e)
-		{
-			musicPlayer.Stop();
-			dispatcherTimer.Stop();
-		}
 
-		private void SongListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-		{
-			//musicPlayer.End();
-			//maybe add currently selected name to top
-		}
+		//not used, but might need it later. It works, just need to add this to a button
+		//private void CtrlStopBtn_Click(object sender, RoutedEventArgs e)
+		//{
+		//	musicPlayer.Stop();
+		//	dispatcherTimer.Stop();
+		//}
 
 		private void dispatcherTimer_Tick(object sender, EventArgs e)
 		{
 			musicPlayer.Update();
+			if (!musicPlayer.IsPlaying && !musicPlayer.manualStop)
+			{
+				int nextIndex, maximum;
+				ListBox listbox;
+				if(songListTabControl.SelectedIndex == 1)		//if in search box
+				{
+					nextIndex = searchListbox.SelectedIndex + 1;
+					maximum = searchListbox.Items.Count;
+					listbox = searchListbox;
+				}
+				else	//main window
+				{
+					nextIndex = songListBox.SelectedIndex + 1;
+					maximum = currentPlaylist.SongCount;
+					listbox = songListBox;
+				}
+
+
+
+				//so it doesnt exceed the list 
+				if (nextIndex < maximum)
+				{
+					if ((bool)ctrlShuffleCheckBox.IsChecked)
+					{
+						Random rand = new Random();
+						int num = rand.Next(0, maximum);
+						while(num == listbox.SelectedIndex && maximum > 1)
+						{
+							num = rand.Next(0, maximum);
+						}
+						listbox.SelectedIndex = num;
+					}
+					else
+					{
+						listbox.SelectedIndex++;
+					}
+
+					PlaySong();
+				}
+				else	//reset song to beginning 
+				{
+					musicPlayer.ResetCurrentTime();
+					musicPlayer.Update();
+					dispatcherTimer.Stop();
+				}
+			}
 		}
 
 		private void AudioOutputComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -212,13 +259,28 @@ namespace osu_song_player
 				musicPlayer.Play();
 			Console.WriteLine("finish drag");
 		}
+		private void TimeSlider_MouseUp(object sender, MouseButtonEventArgs e)
+		{
+			musicPlayer.Update();
+		}
+
 
 		private void PlaylistListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			PlaylistItemViewModel item = PlaylistItems[playlistListBox.SelectedIndex];
-			PlaylistViewModel playlist = serializer.DeserializePlaylist(item.Path);
-			if(playlist != null)
-				currentPlaylist.UpdateProperties(playlist);
+			ReserializeCurrentPlaylist();   //checks for changes, and reserialize it
+
+			int index = playlistListBox.SelectedIndex;
+			if (index >= 0 && index < PlaylistItems.Count)
+			{
+				PlaylistItemViewModel item = PlaylistItems[index];
+				PlaylistViewModel playlist = serializer.DeserializePlaylist(item.Path);
+				if (playlist != null)
+					currentPlaylist.UpdateProperties(playlist);
+				if (currentPlaylist.Songs.Count > 0)
+				{
+					songListBox.SelectedIndex = 0;
+				}
+			}
 		}
 
 		private void VolumeSlider_DragDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e)
@@ -245,6 +307,15 @@ namespace osu_song_player
 			{
 				MessageBox.Show("Cannot create playlist due to ongoing operation");
 				return;
+			}
+
+			for(int i = 0; i < PlaylistItems.Count; i++)
+			{
+				if (PlaylistItems[i].Name.Equals(newPlaylistTextbox.Text, StringComparison.InvariantCultureIgnoreCase))
+				{
+					MessageBox.Show("Name already exist");
+					return;
+				}
 			}
 
 
@@ -300,7 +371,7 @@ namespace osu_song_player
 
 			if (((PlaylistItemViewModel)targetPlaylistComboBox.SelectedItem).Name.Equals(currentPlaylist.Name))
 			{
-				MessageBox.Show("Cannot add to the same playlist");
+				MessageBox.Show("The source and destination playlist cannot be the same");
 				return;
 			}
 
@@ -313,5 +384,111 @@ namespace osu_song_player
 
 			Console.WriteLine("moved " + selectedSongs.Count + " to " + targetPlaylist.Name);
 		}
+
+		private void DeleteSongButton_Click(object sender, RoutedEventArgs e)
+		{
+			if (songListBox.SelectedItems.Count <= 0)
+			{
+				Console.WriteLine("cannot delete song");
+				return;
+			}
+			if(songListTabControl.SelectedIndex == 1)
+			{
+				MessageBox.Show("Please return to the \"All Songs\" to delete songs");
+				return;
+			}
+
+
+			currentPlaylist.changed = true;
+			List<SongViewModel> selectedSongs = songListBox.SelectedItems.Cast<SongViewModel>().ToList();
+			for(int i = 0; i < selectedSongs.Count; i++)
+			{
+				Console.WriteLine("Removed " + selectedSongs[i].ToString());
+				currentPlaylist.Songs.Remove(selectedSongs[i]);
+			}
+			MessageBox.Show("Deleted " + selectedSongs.Count + " songs from "+ currentPlaylist.Name);
+		}
+
+		private void ReserializeCurrentPlaylist()
+		{
+			if (currentPlaylist.changed)
+			{
+				Console.WriteLine("reserialized changed playlist: " + currentPlaylist.Name);
+				serializer.Serialize(currentPlaylist);
+				currentPlaylist.changed = false;
+			}
+		}
+
+		private void DeletePlaylistButton_Click(object sender, RoutedEventArgs e)
+		{
+			if (PlaylistItems.Count <= 0)
+			{
+				Console.WriteLine("Cannot delete");
+				return;
+			}
+
+			int index = playlistListBox.SelectedIndex;
+			string path = PlaylistItems[index].Path;
+			serializer.DeletePlaylistFile(path);
+			PlaylistItems.RemoveAt(index);
+			if (PlaylistItems.Count > 0)
+			{
+				playlistListBox.SelectedIndex = 0;
+				if(currentPlaylist.Songs.Count > 0)
+				{
+					songListBox.SelectedIndex = 0;
+				}
+			}
+			else
+			{
+				songListBox.Items.Refresh();
+			}
+		}
+
+		private void MainTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			if(mainTabControl.SelectedIndex == 2)
+			{
+				if(playlistListBox.SelectedIndex >= 0 && currentPlaylist != null)
+				{
+					renameTextBox.Text = currentPlaylist.Name;
+				}
+			}
+		}
+
+		private void ConfirmRenameButton_Click(object sender, RoutedEventArgs e)
+		{
+			if(renameTextBox.Text.Length <= 0)
+			{
+				MessageBox.Show("Name cannot be empty");
+				return;
+			}
+			if (renameTextBox.Text.Equals(currentPlaylist.Name))
+			{
+				MessageBox.Show("Name is the same");
+				return;
+			}
+
+			string before = currentPlaylist.Name;
+			currentPlaylist.Name = renameTextBox.Text;
+			PlaylistItems[playlistListBox.SelectedIndex].Name = renameTextBox.Text;
+			string newPath = serializer.RenamePlaylist(PlaylistItems[playlistListBox.SelectedIndex].Path, renameTextBox.Text);
+			PlaylistItems[playlistListBox.SelectedIndex].Path = newPath;
+
+
+			MessageBox.Show("Playlist renamed from " + before + " to " + currentPlaylist.Name);
+		}
+
+		private void CtrlPreviousBtn_Click(object sender, RoutedEventArgs e)
+		{
+
+		}
+
+		private void CtrlNextBtn_Click(object sender, RoutedEventArgs e)
+		{
+
+		}
+
+
 	}
 }
