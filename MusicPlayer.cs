@@ -7,6 +7,7 @@ using CSCore;
 using CSCore.Codecs;
 using CSCore.CoreAudioAPI;
 using CSCore.SoundOut;
+using System.Windows;
 namespace osu_song_player
 {
 	public class MusicPlayer : ViewModelBase
@@ -83,6 +84,8 @@ namespace osu_song_player
 		{
 			NotifyPropertyChanged("Position");
 			NotifyPropertyChanged("PositionInTime");
+			if (soundOut == null)
+				return;
 			Console.WriteLine("state " + soundOut.PlaybackState);
 			if (soundOut.PlaybackState == PlaybackState.Stopped)
 				IsPlaying = false;
@@ -91,6 +94,13 @@ namespace osu_song_player
 		public void Open(SongViewModel songViewModel, string name, MMDevice device)
 		{
 			CleanUp();
+
+			if (!System.IO.File.Exists(name))
+			{
+				MessageBox.Show("Cannot find the song file at " + name, "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+				return;
+			}
+
 			waveSource = CodecFactory.Instance.GetCodec(name).ToSampleSource().ToMono().ToWaveSource();
 			soundOut = new WasapiOut() { Latency = 100, Device = device };
 			soundOut.Initialize(waveSource);

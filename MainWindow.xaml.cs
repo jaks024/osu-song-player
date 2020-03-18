@@ -16,6 +16,7 @@ using CSCore.Codecs;
 using CSCore.CoreAudioAPI;
 using CSCore.SoundOut;
 using CSCore.Streams;
+using Microsoft.WindowsAPICodePack.Dialogs;
 namespace osu_song_player
 {
 	/// <summary>
@@ -96,17 +97,19 @@ namespace osu_song_player
 		List<SongViewModel> temp = new List<SongViewModel>();
 		private void SelectPathBtn_Click(object sender, RoutedEventArgs e)
 		{
-			var dialog = new System.Windows.Forms.FolderBrowserDialog();
-			if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+
+			CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+			dialog.InitialDirectory = "C:\\Users";
+			dialog.IsFolderPicker = true;
+			if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
 			{
-				if (!dialog.SelectedPath.Equals(selectedFolderPath))
+				if (!dialog.FileName.Equals(selectedFolderPath))
 				{
-					LoadSongsFromPath(dialog.SelectedPath);
+					LoadSongsFromPath(dialog.FileName);
 
 					//if path changed, save it to config
 					SerializeConfig();
 				}
-				
 			}
 		}
 
@@ -308,13 +311,13 @@ namespace osu_song_player
 		{
 			if(newPlaylistTextbox.Text.Length == 0)
 			{
-				MessageBox.Show("Playlist must have a name");
+				MessageBox.Show("Playlist must have a name", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
 				return;
 			}
 
 			if (playlistCreator.inProgress && (bool)createConditionCheckBox.IsChecked )
 			{
-				MessageBox.Show("Cannot create playlist due to ongoing operation");
+				MessageBox.Show("Cannot create playlist due to ongoing operation", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
 				return;
 			}
 
@@ -322,7 +325,7 @@ namespace osu_song_player
 			{
 				if (PlaylistItems[i].Name.Equals(newPlaylistTextbox.Text, StringComparison.InvariantCultureIgnoreCase))
 				{
-					MessageBox.Show("Name already exist");
+					MessageBox.Show("Name already exist", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
 					return;
 				}
 			}
@@ -333,7 +336,8 @@ namespace osu_song_player
 				playlistCreator.events += AddToPlaylistItemListFromCreator;
 				playlistCreator.CreatePlaylist(newPlaylistTextbox.Text, selectedFolderPath);
 				Console.WriteLine("called");
-				MessageBox.Show("All songs from the osu! folder are being fetched, and the playlist will be added when operation is complete. This might take a while.");
+				MessageBox.Show("All songs from the osu! folder are being fetched, and the playlist will be added when operation is complete. This might take a while."
+					, "Information", MessageBoxButton.OK, MessageBoxImage.Information);
 			}
 			else
 			{
@@ -354,7 +358,7 @@ namespace osu_song_player
 			});
 
 			Console.WriteLine("added to list");
-			MessageBox.Show(playlistCreator.tempPlaylist.Name + " has been added to playlist");
+			MessageBox.Show(playlistCreator.tempPlaylist.Name + " has been added to playlist", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
 			playlistCreator.tempPlaylist = null;
 		}
 
@@ -367,76 +371,84 @@ namespace osu_song_player
 				case 1:     //tab 1, search tab
 					selectedSongs = searchListbox.SelectedItems.Cast<SongViewModel>().ToList();
 					break;
-				default:	//tab 0, song list
+				default:    //tab 0, song list
 					selectedSongs = songListBox.SelectedItems.Cast<SongViewModel>().ToList();
 					break;
 			}
 
 			if (selectedSongs.Count <= 0)
 			{
-				MessageBox.Show("No songs are selected");
+				MessageBox.Show("No songs are selected", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
 				return;
 			}
 
 			if (((PlaylistItemViewModel)targetPlaylistComboBox.SelectedItem).Name.Equals(currentPlaylist.Name))
 			{
-				MessageBox.Show("The source and destination playlist cannot be the same");
+				MessageBox.Show("The source and destination playlist cannot be the same", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
 				return;
 			}
 
+
+
 			PlaylistItemViewModel item = PlaylistItems[targetPlaylistComboBox.SelectedIndex];
 			PlaylistViewModel targetPlaylist = serializer.DeserializePlaylist(item.Path);
-			int largestInd = 0;
-			for(int i = 0; i < targetPlaylist.Songs.Count; i++)
+			MessageBoxResult result = MessageBox.Show(string.Format("Would you like to copy {0} songs from {1} to {2}", selectedSongs.Count, currentPlaylist.Name, targetPlaylist.Name), "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+			if (result == MessageBoxResult.Yes)
 			{
-				if (targetPlaylist.Songs[i].Order > largestInd)
-					largestInd = targetPlaylist.Songs[i].Order;
+				int largestInd = 0;
+				for (int i = 0; i < targetPlaylist.Songs.Count; i++)
+				{
+					if (targetPlaylist.Songs[i].Order > largestInd)
+						largestInd = targetPlaylist.Songs[i].Order;
+				}
+				for (int i = 0; i < selectedSongs.Count; i++)
+				{
+					SongViewModel song = new SongViewModel(selectedSongs[i]);
+					song.Order = largestInd + i + 1;
+					targetPlaylist.Songs.Add(song);
+				}
+
+				serializer.Serialize(targetPlaylist);
+				Console.WriteLine("moved " + selectedSongs.Count + " to " + targetPlaylist.Name);
 			}
-			for(int i = 0; i < selectedSongs.Count; i++)
-			{
-				SongViewModel song = new SongViewModel(selectedSongs[i]);
-				song.Order = largestInd + i + 1;
-				targetPlaylist.Songs.Add(song);
-			}
-
-			serializer.Serialize(targetPlaylist);
-
-			MessageBox.Show(string.Format("Added {0} songs to {1} from {2}", selectedSongs.Count, currentPlaylist.Name, targetPlaylist.Name));
-
-			Console.WriteLine("moved " + selectedSongs.Count + " to " + targetPlaylist.Name);
 		}
 
 		private void DeleteSongButton_Click(object sender, RoutedEventArgs e)
 		{
 			if (songListBox.SelectedItems.Count <= 0)
 			{
-				Console.WriteLine("cannot delete song");
+				Console.WriteLine("cannot delete song", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
 				return;
 			}
 			if(songListTabControl.SelectedIndex == 1)
 			{
-				MessageBox.Show("Please return to the \"All Songs\" to delete songs");
+				MessageBox.Show("Please return to the \"All Songs\" to delete songs", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
 				return;
 			}
 
-
 			currentPlaylist.changed = true;
 			List<SongViewModel> selectedSongs = songListBox.SelectedItems.Cast<SongViewModel>().ToList();
-			for(int i = 0; i < selectedSongs.Count; i++)
+
+			MessageBoxResult result = MessageBox.Show(string.Format("Would you like to delete {0} songs from {1}", selectedSongs.Count, currentPlaylist.Name), "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+			if (result == MessageBoxResult.Yes)
 			{
-				Console.WriteLine("Removed " + selectedSongs[i].ToString());
-				currentPlaylist.Songs.Remove(selectedSongs[i]);
+				for (int i = 0; i < selectedSongs.Count; i++)
+				{
+					Console.WriteLine("Removed " + selectedSongs[i].ToString());
+					currentPlaylist.Songs.Remove(selectedSongs[i]);
+				}
+
+				songListBox.SelectedIndex = 0;
+				for (int i = 0; i < currentPlaylist.Songs.Count; i++)
+				{
+					if (currentPlaylist.Songs[i].CheckEquals(currentSong))
+						songListBox.SelectedIndex = i;
+				}
 			}
 
-			songListBox.SelectedIndex = 0;
-			for(int i = 0; i < currentPlaylist.Songs.Count; i++)
-			{
-				if (currentPlaylist.Songs[i].CheckEquals(currentSong))
-					songListBox.SelectedIndex = i;
-			}
-
-
-			MessageBox.Show("Deleted " + selectedSongs.Count + " songs from "+ currentPlaylist.Name);
+			
 		}
 
 		private void ReserializeCurrentPlaylist()
@@ -457,21 +469,27 @@ namespace osu_song_player
 				return;
 			}
 
-			int index = playlistListBox.SelectedIndex;
-			string path = PlaylistItems[index].Path;
-			serializer.DeletePlaylistFile(path);
-			PlaylistItems.RemoveAt(index);
-			if (PlaylistItems.Count > 0)
+			MessageBoxResult result = MessageBox.Show(string.Format("Would you like to delete {0}", currentPlaylist.Name), "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+			if (result == MessageBoxResult.Yes)
 			{
-				playlistListBox.SelectedIndex = 0;
-				if(currentPlaylist.Songs.Count > 0)
+
+				int index = playlistListBox.SelectedIndex;
+				string path = PlaylistItems[index].Path;
+				serializer.DeletePlaylistFile(path);
+				PlaylistItems.RemoveAt(index);
+				if (PlaylistItems.Count > 0)
 				{
-					songListBox.SelectedIndex = 0;
+					playlistListBox.SelectedIndex = 0;
+					if (currentPlaylist.Songs.Count > 0)
+					{
+						songListBox.SelectedIndex = 0;
+					}
 				}
-			}
-			else
-			{
-				songListBox.Items.Refresh();
+				else
+				{
+					songListBox.Items.Refresh();
+				}
 			}
 		}
 
@@ -490,17 +508,17 @@ namespace osu_song_player
 		{
 			if(PlaylistItems.Count <= 0)
 			{
-				MessageBox.Show("No playlist to rename");
+				MessageBox.Show("No playlist to rename", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
 				return;
 			}
 			if(renameTextBox.Text.Length <= 0)
 			{
-				MessageBox.Show("Name cannot be empty");
+				MessageBox.Show("Name cannot be empty", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
 				return;
 			}
 			if (renameTextBox.Text.Equals(currentPlaylist.Name))
 			{
-				MessageBox.Show("Name is the same");
+				MessageBox.Show("Name is the same", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
 				return;
 			}
 
@@ -511,7 +529,7 @@ namespace osu_song_player
 			PlaylistItems[playlistListBox.SelectedIndex].Path = newPath;
 
 
-			MessageBox.Show("Playlist renamed from " + before + " to " + currentPlaylist.Name);
+			MessageBox.Show("Playlist renamed from " + before + " to " + currentPlaylist.Name, "Information", MessageBoxButton.OK, MessageBoxImage.Information);
 		}
 
 		private void CtrlPreviousBtn_Click(object sender, RoutedEventArgs e)
@@ -574,6 +592,13 @@ namespace osu_song_player
 				Console.WriteLine("cleared at tab control");
 				shuffleController.ClearPastValues();
 			}
+		}
+
+		private void PlaySong_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+		{
+			PlaySong();
+			musicPlayer.Update();
+			dispatcherTimer.Start();
 		}
 	}
 }

@@ -4,17 +4,17 @@
 winexe
 C#
 .cs
-E:\GitHub\osu-song-player\obj\Debug\
+E:\GitHub\osu-song-player\obj\Release\
 osu_song_player
 none
 false
-DEBUG;TRACE
+TRACE
 E:\GitHub\osu-song-player\App.xaml
 11151548125
 
-16-892978393
-16575350837
+17-864380706
+19275045766
 MainWindow.xaml;
 
-False
+True
 

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using System.Windows;
 namespace osu_song_player
 {
 	public class PlaylistSerializer
@@ -81,12 +82,11 @@ namespace osu_song_player
 			if (!File.Exists(path))
 			{
 				Console.WriteLine("Playlist doesnt exist");
-				System.Windows.MessageBox.Show("Cannot delete a playlist that does not exist");
+				MessageBox.Show("Cannot delete a playlist that does not exist", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
 				return;
 			}
 
 			File.Delete(path);
-			System.Windows.MessageBox.Show("Deleted playlist at " + path);
 			Console.WriteLine("deleted " + path);
 		}
 
@@ -95,7 +95,7 @@ namespace osu_song_player
 			if (!File.Exists(path))
 			{
 				Console.WriteLine("Playlist doesnt exist");
-				System.Windows.MessageBox.Show("Cannot rename a playlist that does not exist");
+				MessageBox.Show("Cannot rename a playlist that does not exist", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
 				return "";
 			}
 			int index = path.LastIndexOf("\\") + 1;

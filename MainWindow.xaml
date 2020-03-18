@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:osu_song_player"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="osu! song player" Height="450" Width="800">
     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
@@ -146,7 +146,7 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <Label Content="{Binding Order, Mode=OneWay}"/>
-                                    <Label Grid.Column="1" Content="{Binding Name, Mode=OneWay}"/>
+                                    <Label Grid.Column="1" Content="{Binding Name, Mode=OneWay}" MouseDoubleClick="PlaySong_MouseDoubleClick"/>
                                     <Label Grid.Column="2" HorizontalContentAlignment="Right" Content="{Binding Artist, Mode=OneWay}"/>
                                 </Grid>
                             </DataTemplate>
@@ -178,14 +178,8 @@
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
                                         <Label Content="{Binding Order, Mode=OneWay}"/>
-                                        <Label Grid.Column="1" Content="{Binding Name, Mode=OneWay}"/>
+                                        <Label Grid.Column="1" Content="{Binding Name, Mode=OneWay}" MouseDoubleClick="PlaySong_MouseDoubleClick"/>
                                         <Label Grid.Column="2" HorizontalContentAlignment="Right" Content="{Binding Artist, Mode=OneWay}"/>
-                                        <Grid.ContextMenu>
-                                            <ContextMenu>
-                                                <MenuItem Header="Remove"/>
-                                                <MenuItem Header="Add to playlist"/>
-                                            </ContextMenu>
-                                        </Grid.ContextMenu>
                                     </Grid>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
@@ -217,7 +211,7 @@
 
 
         <StackPanel Name="footerStackPanel" Grid.Row="2" Orientation="Horizontal">
-            <Button Name="selectPathBtn" Width="100" Margin="5" Click="SelectPathBtn_Click">Select osu! folder</Button>
+            <Button Name="selectPathBtn" Width="150" Margin="5" Click="SelectPathBtn_Click">Select osu! song folder</Button>
             <TextBlock Name="selectedPathTextBlock" Grid.Column="1" Margin="5" VerticalAlignment="Center">
             </TextBlock>
             <ComboBox Name="audioOutputComboBox" Margin="5" SelectionChanged="AudioOutputComboBox_SelectionChanged"/>

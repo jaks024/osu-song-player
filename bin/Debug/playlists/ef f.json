@@ -1,24 +1,6 @@
 {
   "Songs": [
     {
-      "Order": 0,
-      "Name": "FLARE (TV Size)",
-      "Artist": "Void_Chords feat. LIO",
-      "Path": "1000078 Void_Chords feat LIO - FLARE (TV Size)\\audio.mp3"
-    },
-    {
-      "Order": 1,
-      "Name": "Kawaii",
-      "Artist": "Thaehan",
-      "Path": "1000338 Thaehan - Kawaii\\audio.mp3"
-    },
-    {
-      "Order": 2,
-      "Name": "Fly Away",
-      "Artist": "nu11",
-      "Path": "1000488 nu11 - Fly Away\\audio.mp3"
-    },
-    {
       "Order": 3,
       "Name": "Yotsuya-san ni Yoroshiku",
       "Artist": "Himeringo",
@@ -29,12 +11,6 @@
       "Name": "Ginpatsu no Miko",
       "Artist": "Symholic",
       "Path": "1000676 Symholic - Ginpatsu no Miko\\audio.mp3"
-    },
-    {
-      "Order": 5,
-      "Name": "Line Moonlight",
-      "Artist": "moro",
-      "Path": "1000838 moro - Line Moonlight\\moro - Line Moonlight.mp3"
     },
     {
       "Order": 6,
@@ -65,12 +41,6 @@
       "Name": "oyasumi",
       "Artist": "Shiggy Jr.",
       "Path": "1001305 Shiggy Jr - oyasumi\\audio.mp3"
-    },
-    {
-      "Order": 11,
-      "Name": "MIIRO",
-      "Artist": "Roselia",
-      "Path": "1001324 Roselia - MIIRO\\audio.mp3"
     },
     {
       "Order": 12,

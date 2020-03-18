@@ -2,8 +2,17 @@ E:\GitHub\osu-song-player\bin\Release\osu-song-player.exe.config
 E:\GitHub\osu-song-player\bin\Release\osu-song-player.exe
 E:\GitHub\osu-song-player\bin\Release\osu-song-player.pdb
 E:\GitHub\osu-song-player\bin\Release\CSCore.dll
+E:\GitHub\osu-song-player\bin\Release\Microsoft.WindowsAPICodePack.dll
+E:\GitHub\osu-song-player\bin\Release\Microsoft.WindowsAPICodePack.Shell.dll
+E:\GitHub\osu-song-player\bin\Release\Microsoft.WindowsAPICodePack.ShellExtensions.dll
 E:\GitHub\osu-song-player\bin\Release\Newtonsoft.Json.dll
 E:\GitHub\osu-song-player\bin\Release\CSCore.xml
+E:\GitHub\osu-song-player\bin\Release\Microsoft.WindowsAPICodePack.pdb
+E:\GitHub\osu-song-player\bin\Release\Microsoft.WindowsAPICodePack.xml
+E:\GitHub\osu-song-player\bin\Release\Microsoft.WindowsAPICodePack.Shell.pdb
+E:\GitHub\osu-song-player\bin\Release\Microsoft.WindowsAPICodePack.Shell.xml
+E:\GitHub\osu-song-player\bin\Release\Microsoft.WindowsAPICodePack.ShellExtensions.pdb
+E:\GitHub\osu-song-player\bin\Release\Microsoft.WindowsAPICodePack.ShellExtensions.xml
 E:\GitHub\osu-song-player\bin\Release\Newtonsoft.Json.xml
 E:\GitHub\osu-song-player\obj\Release\MainWindow.g.cs
 E:\GitHub\osu-song-player\obj\Release\App.g.cs
@@ -17,3 +26,4 @@ E:\GitHub\osu-song-player\obj\Release\osu-song-player.csproj.CoreCompileInputs.c
 E:\GitHub\osu-song-player\obj\Release\osu-song-player.csproj.CopyComplete
 E:\GitHub\osu-song-player\obj\Release\osu-song-player.exe
 E:\GitHub\osu-song-player\obj\Release\osu-song-player.pdb
+E:\GitHub\osu-song-player\obj\Release\osu-song-player.csprojAssemblyReference.cache
