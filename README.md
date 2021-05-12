@@ -14,6 +14,6 @@
 
 
 # Libraries used
-[Newtonsoft Json.NET](https://www.newtonsoft.com/json) 
-[CSCore](https://github.com/filoe/cscore)
-[Microsoft Windows API Code Pack 1.1](https://github.com/aybe/Windows-API-Code-Pack-1.1)
+* [Newtonsoft Json.NET](https://www.newtonsoft.com/json) 
+* [CSCore](https://github.com/filoe/cscore)
+* [Microsoft Windows API Code Pack 1.1](https://github.com/aybe/Windows-API-Code-Pack-1.1)
